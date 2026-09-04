@@ -1,0 +1,713 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>P&L — бюджет, операции и OCR 1С</title>
+<style>
+:root{
+  --bg:#f4f4f6;--card:#fff;--text:#111114;--muted:#73737b;--line:#e3e3e8;
+  --soft:#f8f8fa;--green:#14804a;--red:#b42318;--blue:#2563eb;--radius:18px;
+  --shadow:0 1px 2px rgba(0,0,0,.035),0 10px 32px rgba(0,0,0,.045)
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%;scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","SF Pro Display",Inter,Segoe UI,Arial,sans-serif;padding:calc(16px + env(safe-area-inset-top)) calc(14px + env(safe-area-inset-right)) calc(26px + env(safe-area-inset-bottom)) calc(14px + env(safe-area-inset-left));font-variant-numeric:tabular-nums}
+.app{max-width:1280px;margin:0 auto}
+.top{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;margin-bottom:14px}
+h1{font-size:28px;letter-spacing:-.035em;line-height:1.05;margin:2px 0 5px}.sub{font-size:13px;color:var(--muted)}
+.actions{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end}
+button,.file-btn{border:0;background:#fff;color:var(--text);box-shadow:inset 0 0 0 1px var(--line);border-radius:12px;min-height:44px;padding:0 14px;font-size:14px;font-weight:700;cursor:pointer;-webkit-tap-highlight-color:transparent;display:inline-flex;align-items:center;justify-content:center;gap:7px;white-space:nowrap}
+button:active,.file-btn:active{transform:scale(.985)}button.primary{background:#111114;color:#fff;box-shadow:none}button.danger{color:var(--red)}
+.summary{background:var(--card);border-radius:var(--radius);padding:14px;box-shadow:var(--shadow);margin-bottom:12px}
+.metrics{display:grid;grid-template-columns:1.25fr repeat(4,1fr);gap:9px}
+.metric{background:var(--soft);border:1px solid var(--line);border-radius:14px;padding:12px;min-width:0}
+.label{font-size:11px;text-transform:uppercase;letter-spacing:.055em;color:var(--muted);font-weight:800;margin-bottom:6px}
+.metric .value{font-size:21px;font-weight:780;letter-spacing:-.025em;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.income .value{color:var(--green)}.expense .value{color:var(--red)}.pnl.pos .value{color:var(--green)}.pnl.neg .value{color:var(--red)}
+.budget-input{display:flex;align-items:center;gap:5px}.budget-input input{width:100%;min-width:0;border:0;background:transparent;outline:0;color:var(--text);font-size:22px;font-weight:780;padding:0}.cur{font-size:15px;color:var(--muted);font-weight:750}
+.toolbar{background:var(--card);box-shadow:var(--shadow);border-radius:var(--radius) var(--radius) 0 0;padding:12px 12px 10px;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;gap:10px}
+.toolbar-title{font-weight:780;font-size:17px}.hint{font-size:12px;color:var(--muted);margin-top:2px}.toolbar-right{display:flex;gap:8px;align-items:center}.save-state{font-size:12px;color:var(--muted);white-space:nowrap}
+.table-shell{background:var(--card);box-shadow:var(--shadow);border-radius:0 0 var(--radius) var(--radius);overflow:hidden}
+.table-scroll{overflow:auto;-webkit-overflow-scrolling:touch;max-height:calc(100vh - 305px);min-height:430px}
+table{border-collapse:separate;border-spacing:0;width:100%;min-width:1120px}
+th{position:sticky;top:0;z-index:5;background:#f8f8fa;color:#686870;font-size:11px;text-transform:uppercase;letter-spacing:.045em;font-weight:800;text-align:left;padding:10px 8px;border-bottom:1px solid var(--line);white-space:nowrap}
+td{padding:4px 5px;border-bottom:1px solid #ededf1;background:#fff;height:52px;vertical-align:middle}
+tr:last-child td{border-bottom:0}.num{width:46px;text-align:center;color:#9a9aa1;font-size:12px;position:sticky;left:0;z-index:2;background:#fbfbfc;border-right:1px solid var(--line)}th.num{z-index:8}
+.cell{width:100%;height:42px;border:1px solid transparent;background:transparent;border-radius:9px;outline:0;padding:0 9px;font-size:14px;color:var(--text)}.cell:hover{border-color:#e8e8ec;background:#fcfcfd}.cell:focus{background:#fff;border-color:#a7a7af;box-shadow:0 0 0 3px rgba(0,0,0,.04)}select.cell{padding-right:26px}.date{min-width:135px}.project{min-width:150px}.type{min-width:112px}.category{min-width:140px}.amount{min-width:122px;text-align:right}.comment{min-width:220px}.balance{min-width:130px;text-align:right;font-weight:760;padding-right:10px;white-space:nowrap}.balance.neg{color:var(--red)}
+.row-clear{height:38px;min-height:38px;width:38px;padding:0;border-radius:9px;color:#94949b;background:transparent;box-shadow:none;font-size:17px}.row-clear:hover{background:#f6f6f8}
+.table-footer{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 12px;background:#fafafd;border-top:1px solid var(--line);font-size:12px;color:var(--muted)}
+.legend{display:flex;gap:14px;flex-wrap:wrap}.dot{display:inline-block;width:7px;height:7px;border-radius:50%;margin-right:5px;background:#aaa}.dot.g{background:var(--green)}.dot.r{background:var(--red)}
+.toast{position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom));transform:translateX(-50%) translateY(20px);background:#111114;color:white;padding:10px 14px;border-radius:12px;font-size:13px;font-weight:650;opacity:0;pointer-events:none;transition:.2s;z-index:50;box-shadow:0 8px 30px rgba(0,0,0,.22)}.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+#jsonInput{display:none}
+
+.ocr{background:var(--card);border-radius:var(--radius);padding:14px;box-shadow:var(--shadow);margin-bottom:12px}
+.ocr-head{display:flex;align-items:flex-start;justify-content:space-between;gap:14px;margin-bottom:12px}.ocr-title{font-size:17px;font-weight:780}.ocr-sub{font-size:12px;color:var(--muted);margin-top:3px;max-width:720px;line-height:1.4}
+.ocr-actions{display:flex;gap:8px;flex-wrap:wrap;align-items:center}.ocr-file{display:none}.ocr-drop{border:1.5px dashed #c8c8cf;border-radius:14px;background:var(--soft);padding:18px;display:flex;align-items:center;justify-content:center;text-align:center;min-height:92px;color:var(--muted);font-size:13px;cursor:pointer;-webkit-tap-highlight-color:transparent}.ocr-drop strong{display:block;color:var(--text);font-size:15px;margin-bottom:4px}.ocr-drop.drag{border-color:#888;background:#f3f3f6}
+.ocr-progress{display:none;margin-top:10px}.ocr-progress.show{display:block}.ocr-progress-top{display:flex;justify-content:space-between;gap:12px;font-size:12px;color:var(--muted);margin-bottom:6px}.ocr-bar{height:7px;border-radius:999px;background:var(--line);overflow:hidden}.ocr-bar>i{display:block;height:100%;width:0;background:var(--text);transition:width .2s}
+.ocr-results{display:grid;gap:10px;margin-top:12px}
+.ocr-result{border:1px solid var(--line);border-radius:14px;overflow:hidden;background:var(--soft)}
+.ocr-source-head{display:grid;grid-template-columns:170px 1fr auto;gap:12px;align-items:center;padding:12px;border-bottom:1px solid var(--line)}
+.ocr-thumb{width:170px;height:112px;object-fit:contain;border-radius:10px;background:#fff;border:1px solid var(--line)}
+.ocr-source-title{font-size:14px;font-weight:800;word-break:break-word}.ocr-source-meta{font-size:11px;color:var(--muted);margin-top:4px;line-height:1.4}.ocr-source-count{font-size:22px;font-weight:820;letter-spacing:-.03em;margin-top:6px}.ocr-source-count small{font-size:11px;font-weight:650;color:var(--muted);letter-spacing:0}
+.ocr-result-actions{display:flex;gap:7px;flex-wrap:wrap;justify-content:flex-end}.smallbtn{min-height:34px;height:34px;padding:0 10px;border-radius:9px;font-size:12px}
+.ocr-table-scroll{overflow:auto;-webkit-overflow-scrolling:touch;background:var(--card)}
+.ocr-review-table{width:100%;min-width:1110px;border-collapse:separate;border-spacing:0;font-size:12px}.ocr-review-table th{position:sticky;top:0;z-index:2;height:32px;padding:0 7px;background:#f1f1f4;color:var(--muted);font-size:9px;text-transform:uppercase;letter-spacing:.04em;text-align:left;border-bottom:1px solid var(--line)}.ocr-review-table td{height:auto;padding:5px 4px;border-bottom:1px solid var(--line);background:var(--card)}.ocr-review-table tr:last-child td{border-bottom:0}.ocr-review-table .rowno{width:34px;text-align:center;color:var(--muted);font-weight:700}.ocr-review-table input,.ocr-review-table select{width:100%;height:38px;border:1px solid var(--line);border-radius:8px;background:var(--card);color:var(--text);font:inherit;font-size:12px;padding:0 8px;outline:0}.ocr-review-table input:focus,.ocr-review-table select:focus{border-color:#999;box-shadow:0 0 0 2px rgba(0,0,0,.04)}.ocr-review-table .oa{width:112px;text-align:right}.ocr-review-table .od{width:132px}.ocr-review-table .ot{width:118px}.ocr-review-table .oc{width:140px}.ocr-review-table .op{width:155px}.ocr-review-table .ocom{min-width:300px}.ocr-review-table .orowact{width:90px;white-space:nowrap;text-align:right}.ocr-review-table .orowact button{width:34px;height:34px;min-height:34px;padding:0;border-radius:8px}.ocr-confidence.good{color:var(--green)}.ocr-confidence.warn{color:#9a6700}
+.ocr-raw{border-top:1px solid var(--line);padding:10px 12px}.ocr-raw summary{cursor:pointer;font-size:12px;font-weight:700;color:var(--muted)}.ocr-raw textarea{width:100%;min-height:150px;margin-top:8px;border:1px solid var(--line);border-radius:9px;background:var(--card);color:var(--text);padding:9px;font:12px/1.35 ui-monospace,SFMono-Regular,Menlo,monospace;resize:vertical}.ocr-raw-actions{display:flex;justify-content:flex-end;margin-top:7px}.privacy-note{font-size:11px;color:var(--muted);margin-top:8px;line-height:1.35}
+
+@media(max-width:900px){
+ .ocr-head{flex-direction:column}.ocr-source-head{grid-template-columns:130px 1fr}.ocr-thumb{width:130px;height:96px}.ocr-source-head>.ocr-result-actions{grid-column:1/-1;justify-content:flex-start}
+ body{padding-left:8px;padding-right:8px}.top{flex-direction:column}.actions{justify-content:flex-start;width:100%}.metrics{grid-template-columns:1fr 1fr}.metric:first-child{grid-column:1/-1}.table-scroll{max-height:calc(100vh - 365px);min-height:420px}.toolbar{align-items:flex-start}.toolbar-right{flex-direction:column;align-items:flex-end}.save-state{font-size:11px}
+}
+@media(max-width:560px){.ocr-source-head{grid-template-columns:1fr}.ocr-thumb{width:100%;height:130px}.ocr-actions{width:100%}.ocr-actions>*{flex:1}.ocr-result-actions{justify-content:flex-start}
+.actions{display:grid;grid-template-columns:1fr 1fr}.actions>*{width:100%}.metrics{gap:7px}.metric .value{font-size:18px}.toolbar-right button{padding:0 10px}.hint{max-width:260px}}
+@media(prefers-color-scheme:dark){
+ :root{--bg:#111113;--card:#1c1c1f;--text:#f4f4f5;--muted:#a0a0a8;--line:#333339;--soft:#242428;--shadow:none}
+ button,.file-btn{background:#252529;color:var(--text)}button.primary{background:#f2f2f3;color:#111114}.toolbar,.table-shell,.summary{background:var(--card)}th{background:#242428;color:#aaaab2}td{background:#1c1c1f;border-bottom-color:#2c2c31}.num{background:#202024}.cell{color:var(--text)}.cell:hover,.cell:focus{background:#252529;border-color:#45454d}.table-footer{background:#222226}.row-clear{color:#aaa}.row-clear:hover{background:#29292e}.toast{background:#f2f2f3;color:#111114}
+}
+</style>
+</head>
+<body>
+<main class="app">
+  <div class="top">
+    <div><h1>P&L</h1><div class="sub">Бюджет и операции. Всё хранится локально на этом устройстве.</div></div>
+    <div class="actions">
+      <button id="exportJson">Выгрузить JSON</button>
+      <label class="file-btn" for="jsonInput">Загрузить JSON</label>
+      <input id="jsonInput" type="file" accept="application/json,.json">
+      <button id="exportXlsx">Выгрузить Excel</button>
+      <button id="reset" class="danger">Очистить всё</button>
+    </div>
+  </div>
+
+  <section class="summary">
+    <div class="metrics">
+      <div class="metric">
+        <div class="label">Стартовый бюджет</div>
+        <div class="budget-input"><input id="startBudget" type="number" step="0.01" inputmode="decimal" placeholder="0"><span class="cur">₽</span></div>
+      </div>
+      <div class="metric"><div class="label">Текущий бюджет</div><div class="value" id="currentBudget">0 ₽</div></div>
+      <div class="metric income"><div class="label">Доходы</div><div class="value" id="income">0 ₽</div></div>
+      <div class="metric expense"><div class="label">Расходы</div><div class="value" id="expense">0 ₽</div></div>
+      <div class="metric pnl" id="pnlBox"><div class="label">P&L</div><div class="value" id="pnl">0 ₽</div></div>
+    </div>
+  </section>
+
+  <section class="ocr" id="ocrSection">
+    <div class="ocr-head">
+      <div>
+        <div class="ocr-title">Распознавание скринов 1С</div>
+        <div class="ocr-sub">Выбери один или несколько скриншотов. На одном скрине может быть много строк 1С: каждая строка будет разобрана как отдельная операция и показана перед добавлением.</div>
+      </div>
+      <div class="ocr-actions">
+        <label class="file-btn" for="ocrInput">Выбрать скрины</label>
+        <input class="ocr-file" id="ocrInput" type="file" accept="image/*" multiple>
+        <button id="addAllOcr" class="primary" style="display:none">Добавить все</button>
+        <button id="clearOcr" style="display:none">Очистить</button>
+      </div>
+    </div>
+    <label class="ocr-drop" id="ocrDrop" for="ocrInput"><span><strong>Скриншоты из 1С</strong>Нажми сюда или перетащи изображения. Можно загружать скрины с 1, 10, 20+ строками — найденные операции появятся таблицей.</span></label>
+    <div class="ocr-progress" id="ocrProgress"><div class="ocr-progress-top"><span id="ocrProgressText">Подготовка OCR…</span><span id="ocrProgressPct">0%</span></div><div class="ocr-bar"><i id="ocrBar"></i></div></div>
+    <div class="ocr-results" id="ocrResults"></div>
+    <div class="privacy-note">P&amp;L, автосохранение, JSON и Excel работают локально. OCR в этой сборке требует интернет для загрузки Tesseract и языковой модели; распознавание самой картинки выполняется в браузере, изображение приложением никуда не отправляется.</div>
+  </section>
+
+  <section>
+    <div class="toolbar">
+      <div><div class="toolbar-title">Операции</div><div class="hint">80 строк уже готовы. Заполняй подряд — ничего добавлять не нужно.</div></div>
+      <div class="toolbar-right"><div class="save-state" id="saveState">Автосохранение включено</div><button id="moreRows">+ 50 строк</button></div>
+    </div>
+    <div class="table-shell">
+      <div class="table-scroll" id="tableScroll">
+        <table>
+          <thead><tr>
+            <th class="num">№</th><th style="width:140px">Дата</th><th style="width:170px">Проект</th><th style="width:125px">Тип</th><th style="width:155px">Категория</th><th style="width:130px;text-align:right">Сумма</th><th>Комментарий</th><th style="width:140px;text-align:right">Баланс</th><th style="width:45px"></th>
+          </tr></thead>
+          <tbody id="rows"></tbody>
+        </table>
+      </div>
+      <div class="table-footer"><div class="legend"><span><i class="dot g"></i>Доход</span><span><i class="dot r"></i>Расход</span></div><div id="countInfo">0 операций</div></div>
+    </div>
+  </section>
+</main>
+<div class="toast" id="toast"></div>
+<script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
+<script>
+(() => {
+  'use strict';
+  const STORAGE_KEY = 'pnl-ipad-v2';
+  const VERSION = 7;
+  const INITIAL_ROWS = 80;
+  const CATEGORIES = ['Продажи','Подрядчики','Поставщики','Реклама','Сервисы','Оборудование','Налоги','Транспорт','Комиссии','Зарплата','Аренда','Прочее'];
+  const TYPES = [['','—'],['income','Доход'],['expense','Расход']];
+  const $ = s => document.querySelector(s);
+  const moneyFmt = new Intl.NumberFormat('ru-RU',{maximumFractionDigits:2});
+  const nowISO = () => new Date().toISOString();
+  const todayISO = () => { const d=new Date(); const p=n=>String(n).padStart(2,'0'); return `${d.getFullYear()}-${p(d.getMonth()+1)}-${p(d.getDate())}`; };
+  const uid = () => (crypto.randomUUID ? crypto.randomUUID() : Date.now().toString(36)+Math.random().toString(36).slice(2));
+
+  let state = {version:VERSION,startBudget:0,rowCount:INITIAL_ROWS,operations:[],updatedAt:null};
+  let saveTimer = null;
+
+  const emptyOp = () => ({id:uid(),date:todayISO(),autoDate:true,project:'',type:'',category:'',amount:'',comment:''});
+
+  function normalize(raw){
+    const s = raw && typeof raw === 'object' ? raw : {};
+    const ops = Array.isArray(s.operations) ? s.operations.map(o => {
+      const project=String(o.project||''), category=String(o.category||''), comment=String(o.comment||'');
+      const type=o.type==='income'||o.type==='expense'?o.type:'';
+      const amount=o.amount===''?'':(Number.isFinite(Number(o.amount))?Math.abs(Number(o.amount)) : '');
+      const hasData=!!(project||type||category||comment||Number(amount));
+      const hasStoredAutoDate=o.autoDate===true;
+      const date=String(o.date||(!hasData ? todayISO() : ''));
+      return {id:o.id || uid(),date,autoDate:hasStoredAutoDate || (!hasData && !o.date),project,type,category,amount,comment};
+    }) : [];
+    return {version:VERSION,startBudget:Number(s.startBudget)||0,rowCount:Math.max(INITIAL_ROWS,Number(s.rowCount)||0,ops.length),operations:ops,updatedAt:s.updatedAt||null};
+  }
+
+  function load(){
+    try{ const raw=localStorage.getItem(STORAGE_KEY); if(raw) state=normalize(JSON.parse(raw)); }catch(e){}
+    ensureRows();
+    $('#startBudget').value = state.startBudget || '';
+    render();
+    updateSaveText(state.updatedAt ? 'Сохранено локально' : 'Автосохранение включено');
+  }
+
+  function ensureRows(){
+    const today=todayISO();
+    while(state.operations.length < state.rowCount) state.operations.push(emptyOp());
+    state.operations.forEach(o=>{
+      const hasData=!!(o.project||o.type||o.category||o.comment||Number(o.amount));
+      if(!hasData && o.autoDate===true && o.date!==today) o.date=today;
+      if(!o.date && !hasData){ o.date=today; o.autoDate=true; }
+    });
+  }
+
+  function isFilled(o){ return !!(o.project||o.type||o.category||o.comment||Number(o.amount)); }
+  function signed(o){ const a=Math.abs(Number(o.amount)||0); return o.type==='expense' ? -a : o.type==='income' ? a : 0; }
+  function money(n){ return `${moneyFmt.format(Number(n)||0)} ₽`; }
+  function escapeHtml(s){ return String(s).replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c])); }
+
+  function scheduleSave(){
+    clearTimeout(saveTimer); updateSaveText('Сохраняю…');
+    saveTimer=setTimeout(()=>{
+      state.updatedAt=nowISO();
+      try{ localStorage.setItem(STORAGE_KEY,JSON.stringify(state)); updateSaveText('Сохранено '+new Date().toLocaleTimeString('ru-RU',{hour:'2-digit',minute:'2-digit'})); }
+      catch(e){ updateSaveText('Не удалось сохранить'); toast('Ошибка автосохранения'); }
+    },180);
+  }
+  function updateSaveText(t){ $('#saveState').textContent=t; }
+
+  function totals(){
+    let income=0,expense=0,running=Number(state.startBudget)||0;
+    const balances=[];
+    state.operations.forEach(o=>{ const v=signed(o); if(v>0)income+=v; if(v<0)expense+=Math.abs(v); running+=v; balances.push(running); });
+    return {income,expense,pnl:income-expense,current:(Number(state.startBudget)||0)+income-expense,balances};
+  }
+
+  function options(list,current){ return list.map(([v,l])=>`<option value="${v}" ${v===current?'selected':''}>${l}</option>`).join(''); }
+  function categoryOptions(current){
+    const vals=['',...CATEGORIES]; if(current && !vals.includes(current)) vals.splice(1,0,current);
+    return vals.map(v=>`<option value="${escapeHtml(v)}" ${v===current?'selected':''}>${v?escapeHtml(v):'—'}</option>`).join('');
+  }
+
+  function rowHtml(o,i,balance){
+    return `<tr data-i="${i}">
+      <td class="num">${i+1}</td>
+      <td><input class="cell date" data-f="date" type="date" value="${escapeHtml(o.date)}"></td>
+      <td><input class="cell project" data-f="project" type="text" autocomplete="off" value="${escapeHtml(o.project)}" placeholder="Проект"></td>
+      <td><select class="cell type" data-f="type">${options(TYPES,o.type)}</select></td>
+      <td><select class="cell category" data-f="category">${categoryOptions(o.category)}</select></td>
+      <td><input class="cell amount" data-f="amount" type="number" min="0" step="0.01" inputmode="decimal" value="${o.amount===''?'':escapeHtml(o.amount)}" placeholder="0"></td>
+      <td><input class="cell comment" data-f="comment" type="text" autocomplete="off" value="${escapeHtml(o.comment)}" placeholder="Комментарий"></td>
+      <td class="balance ${balance<0?'neg':''}">${money(balance)}</td>
+      <td><button class="row-clear" data-clear="${i}" title="Очистить строку">×</button></td>
+    </tr>`;
+  }
+
+  function render(){
+    ensureRows();
+    const t=totals();
+    $('#income').textContent=money(t.income); $('#expense').textContent=money(t.expense); $('#pnl').textContent=money(t.pnl); $('#currentBudget').textContent=money(t.current);
+    $('#pnlBox').classList.toggle('pos',t.pnl>0); $('#pnlBox').classList.toggle('neg',t.pnl<0);
+    $('#rows').innerHTML=state.operations.map((o,i)=>rowHtml(o,i,t.balances[i])).join('');
+    $('#countInfo').textContent=`${state.operations.filter(isFilled).length} операций · ${state.rowCount} строк`;
+  }
+
+  function refreshNumbersFrom(startIndex=0){
+    const t=totals();
+    $('#income').textContent=money(t.income); $('#expense').textContent=money(t.expense); $('#pnl').textContent=money(t.pnl); $('#currentBudget').textContent=money(t.current);
+    $('#pnlBox').classList.toggle('pos',t.pnl>0); $('#pnlBox').classList.toggle('neg',t.pnl<0);
+    const trs=$('#rows').querySelectorAll('tr');
+    for(let i=startIndex;i<trs.length;i++){ const cell=trs[i].querySelector('.balance'); cell.textContent=money(t.balances[i]); cell.classList.toggle('neg',t.balances[i]<0); }
+    $('#countInfo').textContent=`${state.operations.filter(isFilled).length} операций · ${state.rowCount} строк`;
+  }
+
+  $('#startBudget').addEventListener('input',e=>{ state.startBudget=Number(e.target.value)||0; refreshNumbersFrom(0); scheduleSave(); });
+
+  $('#rows').addEventListener('input',handleCell);
+  $('#rows').addEventListener('change',handleCell);
+  function handleCell(e){
+    const el=e.target;if(!el.dataset.f)return; const tr=el.closest('tr');const i=Number(tr.dataset.i);const f=el.dataset.f;
+    state.operations[i][f]= f==='amount' ? (el.value===''?'':Math.abs(Number(el.value)||0)) : el.value;
+    if(f==='date') state.operations[i].autoDate=false;
+    if(f!=='date' && isFilled(state.operations[i]) && !state.operations[i].date){ state.operations[i].date=todayISO(); state.operations[i].autoDate=true; }
+    refreshNumbersFrom(i); scheduleSave();
+  }
+
+  $('#rows').addEventListener('click',e=>{
+    const b=e.target.closest('[data-clear]'); if(!b)return; const i=Number(b.dataset.clear); state.operations[i]=emptyOp(); render(); scheduleSave();
+  });
+
+  $('#rows').addEventListener('keydown',e=>{
+    if(e.key!=='Enter')return; const el=e.target.closest('.cell'); if(!el)return; e.preventDefault();
+    const tr=el.closest('tr'); const cells=[...tr.querySelectorAll('.cell')]; const col=cells.indexOf(el); const next=tr.nextElementSibling;
+    if(next){ const target=[...next.querySelectorAll('.cell')][col] || next.querySelector('.cell'); target?.focus(); }
+  });
+
+  $('#moreRows').addEventListener('click',()=>{ state.rowCount+=50; ensureRows(); render(); scheduleSave(); requestAnimationFrame(()=>$('#tableScroll').scrollTo({top:$('#tableScroll').scrollHeight,behavior:'smooth'})); });
+
+  function exportState(){
+    return {format:'pnl-ipad',version:VERSION,exportedAt:nowISO(),startBudget:state.startBudget,rowCount:state.rowCount,operations:state.operations.filter(isFilled).map(o=>({id:o.id,date:o.date,project:o.project,type:o.type,category:o.category,amount:o.amount,comment:o.comment}))};
+  }
+
+  function downloadBlob(blob,name){ const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove();},1000); }
+  function dateStamp(){ return todayISO(); }
+
+  $('#exportJson').addEventListener('click',()=>{
+    const json=JSON.stringify(exportState(),null,2); downloadBlob(new Blob([json],{type:'application/json;charset=utf-8'}),`PnL_${dateStamp()}.json`); toast('JSON выгружен');
+  });
+
+  $('#jsonInput').addEventListener('change',async e=>{
+    const file=e.target.files?.[0]; if(!file)return;
+    try{
+      const data=JSON.parse(await file.text());
+      if(!data || !Array.isArray(data.operations)) throw new Error('bad');
+      state=normalize(data); ensureRows(); $('#startBudget').value=state.startBudget||''; render(); scheduleSave(); toast('JSON загружен');
+    }catch(err){ alert('Не удалось прочитать JSON. Выбери файл, который был выгружен из этого P&L.'); }
+    e.target.value='';
+  });
+
+  $('#reset').addEventListener('click',()=>{
+    if(!confirm('Очистить стартовый бюджет и все операции? Сначала можно выгрузить JSON.')) return;
+    state={version:VERSION,startBudget:0,rowCount:INITIAL_ROWS,operations:[],updatedAt:null}; ensureRows(); $('#startBudget').value=''; render(); scheduleSave(); toast('Таблица очищена');
+  });
+
+  function xmlEscape(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&apos;'}[c]));}
+  function colName(n){let s='';while(n){n--;s=String.fromCharCode(65+n%26)+s;n=Math.floor(n/26)}return s}
+  function xlsxSheetXml(rows,{filter=false}={}){
+    const widths=[14,20,14,18,14,34,16];
+    const maxCols=Math.max(1,...rows.map(r=>r.length));
+    const lastCol=colName(maxCols);
+    const lastRow=Math.max(1,rows.length);
+    const cols=widths.slice(0,maxCols).map((w,i)=>`<col min="${i+1}" max="${i+1}" width="${w}" customWidth="1"/>`).join('');
+    let sheetData='';
+    rows.forEach((row,r)=>{
+      let cells='';
+      row.forEach((cell,c)=>{
+        const ref=colName(c+1)+(r+1);
+        const style=r===0?1:((c===4||c===6||((rows[0]||[]).length===2&&c===1))?2:0);
+        if(typeof cell==='number' && Number.isFinite(cell)){
+          cells+=`<c r="${ref}" s="${style}" t="n"><v>${cell}</v></c>`;
+        } else {
+          cells+=`<c r="${ref}" s="${style}" t="inlineStr"><is><t xml:space="preserve">${xmlEscape(cell)}</t></is></c>`;
+        }
+      });
+      sheetData+=`<row r="${r+1}">${cells}</row>`;
+    });
+    const autoFilter=filter&&rows.length?`<autoFilter ref="A1:${lastCol}${lastRow}"/>`:'';
+    return `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>`+
+      `<worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">`+
+      `<dimension ref="A1:${lastCol}${lastRow}"/>`+
+      `<sheetViews><sheetView workbookViewId="0"><pane ySplit="1" topLeftCell="A2" activePane="bottomLeft" state="frozen"/><selection pane="bottomLeft" activeCell="A2" sqref="A2"/></sheetView></sheetViews>`+
+      `<sheetFormatPr defaultRowHeight="15"/>`+
+      `<cols>${cols}</cols>`+
+      `<sheetData>${sheetData}</sheetData>`+
+      `${autoFilter}`+
+      `</worksheet>`;
+  }
+
+  function crc32(bytes){
+    let crc=-1; for(let i=0;i<bytes.length;i++){crc^=bytes[i];for(let k=0;k<8;k++)crc=(crc>>>1)^((crc&1)?0xEDB88320:0);} return (crc^(-1))>>>0;
+  }
+  function u16(n){return [n&255,(n>>>8)&255]} function u32(n){return [n&255,(n>>>8)&255,(n>>>16)&255,(n>>>24)&255]}
+  function dosDateTime(d=new Date()){
+    const year=Math.max(1980,d.getFullYear());
+    const time=(d.getHours()<<11)|(d.getMinutes()<<5)|(d.getSeconds()>>1);
+    const date=((year-1980)<<9)|((d.getMonth()+1)<<5)|d.getDate();
+    return {time,date};
+  }
+  function zipStore(files){
+    const enc=new TextEncoder(), locals=[], centrals=[]; let offset=0;
+    const stamp=dosDateTime();
+    for(const f of files){
+      const name=enc.encode(f.name), data=typeof f.data==='string'?enc.encode(f.data):f.data, crc=crc32(data);
+      const local=new Uint8Array([0x50,0x4b,0x03,0x04,...u16(20),...u16(0),...u16(0),...u16(stamp.time),...u16(stamp.date),...u32(crc),...u32(data.length),...u32(data.length),...u16(name.length),...u16(0),...name,...data]);
+      locals.push(local);
+      const central=new Uint8Array([0x50,0x4b,0x01,0x02,...u16(20),...u16(20),...u16(0),...u16(0),...u16(stamp.time),...u16(stamp.date),...u32(crc),...u32(data.length),...u32(data.length),...u16(name.length),...u16(0),...u16(0),...u16(0),...u16(0),...u32(0),...u32(offset),...name]);
+      centrals.push(central); offset+=local.length;
+    }
+    const centralSize=centrals.reduce((a,b)=>a+b.length,0);
+    const end=new Uint8Array([0x50,0x4b,0x05,0x06,...u16(0),...u16(0),...u16(files.length),...u16(files.length),...u32(centralSize),...u32(offset),...u16(0)]);
+    return new Blob([...locals,...centrals,end],{type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'});
+  }
+
+  function buildXlsx(){
+    const filled=state.operations.filter(isFilled); let running=Number(state.startBudget)||0;
+    const data=[['Дата','Проект','Тип','Категория','Сумма','Комментарий','Баланс']];
+    filled.forEach(o=>{
+      const v=signed(o); running+=v;
+      data.push([o.date,o.project,o.type==='income'?'Доход':o.type==='expense'?'Расход':'',o.category,v,o.comment,running]);
+    });
+    const totalIncome=filled.reduce((s,o)=>s+(o.type==='income'?Math.abs(Number(o.amount)||0):0),0);
+    const totalExpense=filled.reduce((s,o)=>s+(o.type==='expense'?Math.abs(Number(o.amount)||0):0),0);
+    const summary=[
+      ['Показатель','Значение'],
+      ['Стартовый бюджет',Number(state.startBudget)||0],
+      ['Доходы',totalIncome],
+      ['Расходы',totalExpense],
+      ['P&L',totalIncome-totalExpense],
+      ['Текущий бюджет',running]
+    ];
+    const contentTypes=`<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/><Override PartName="/xl/worksheets/sheet1.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/><Override PartName="/xl/worksheets/sheet2.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/><Override PartName="/xl/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.styles+xml"/></Types>`;
+    const rels=`<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="xl/workbook.xml"/></Relationships>`;
+    const wb=`<?xml version="1.0" encoding="UTF-8" standalone="yes"?><workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships"><bookViews><workbookView xWindow="0" yWindow="0" windowWidth="24000" windowHeight="12000"/></bookViews><sheets><sheet name="Операции" sheetId="1" r:id="rId1"/><sheet name="Сводка" sheetId="2" r:id="rId2"/></sheets><calcPr calcId="191029"/></workbook>`;
+    const wbRels=`<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet1.xml"/><Relationship Id="rId2" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet2.xml"/><Relationship Id="rId3" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles" Target="styles.xml"/></Relationships>`;
+    const styles=`<?xml version="1.0" encoding="UTF-8" standalone="yes"?><styleSheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"><fonts count="2"><font><sz val="11"/><name val="Aptos"/><family val="2"/></font><font><b/><sz val="11"/><name val="Aptos"/><family val="2"/></font></fonts><fills count="2"><fill><patternFill patternType="none"/></fill><fill><patternFill patternType="gray125"/></fill></fills><borders count="1"><border><left/><right/><top/><bottom/><diagonal/></border></borders><cellStyleXfs count="1"><xf numFmtId="0" fontId="0" fillId="0" borderId="0"/></cellStyleXfs><cellXfs count="3"><xf numFmtId="0" fontId="0" fillId="0" borderId="0" xfId="0"/><xf numFmtId="0" fontId="1" fillId="0" borderId="0" xfId="0" applyFont="1"/><xf numFmtId="4" fontId="0" fillId="0" borderId="0" xfId="0" applyNumberFormat="1"/></cellXfs><cellStyles count="1"><cellStyle name="Normal" xfId="0" builtinId="0"/></cellStyles></styleSheet>`;
+    return zipStore([
+      {name:'[Content_Types].xml',data:contentTypes},
+      {name:'_rels/.rels',data:rels},
+      {name:'xl/workbook.xml',data:wb},
+      {name:'xl/_rels/workbook.xml.rels',data:wbRels},
+      {name:'xl/styles.xml',data:styles},
+      {name:'xl/worksheets/sheet1.xml',data:xlsxSheetXml(data,{filter:true})},
+      {name:'xl/worksheets/sheet2.xml',data:xlsxSheetXml(summary,{filter:false})}
+    ]);
+  }
+
+  $('#exportXlsx').addEventListener('click',()=>{ try{downloadBlob(buildXlsx(),`PnL_${dateStamp()}.xlsx`);toast('Excel выгружен без ошибок');}catch(e){console.error(e);alert('Не удалось сформировать Excel-файл.');} });
+
+
+  // ---------- OCR для скриншотов 1С: один скрин = много операций ----------
+  let ocrWorker = null;
+  let ocrItems = [];
+  let ocrSources = [];
+
+  const RU_MONTHS = {января:1,февраля:2,марта:3,апреля:4,мая:5,июня:6,июля:7,августа:8,сентября:9,октября:10,ноября:11,декабря:12};
+  const pad2=n=>String(n).padStart(2,'0');
+  function toIsoDate(d,m,y){ y=Number(y); if(y<100)y+=2000; m=Number(m); d=Number(d); if(!d||!m||m>12||d>31)return ''; return `${y}-${pad2(m)}-${pad2(d)}`; }
+  function parseDateFromText(text){
+    let m=String(text||'').match(/\b([0-3]?\d)[.\/-]([01]?\d)[.\/-](20\d{2}|\d{2})\b/);
+    if(m) return toIsoDate(m[1],m[2],m[3]);
+    m=String(text||'').toLowerCase().match(/\b([0-3]?\d)\s+(января|февраля|марта|апреля|мая|июня|июля|августа|сентября|октября|ноября|декабря)\s+(20\d{2})\b/);
+    if(m) return toIsoDate(m[1],RU_MONTHS[m[2]],m[3]);
+    return '';
+  }
+  function parseNumberToken(token){
+    let x=String(token).replace(/[₽рРPp]/g,'').replace(/руб\.?/gi,'').replace(/\s|\u00a0/g,'').replace(/[^0-9,.-]/g,'');
+    if(!x)return NaN;
+    if(x.includes(',') && x.includes('.')) x=x.lastIndexOf(',')>x.lastIndexOf('.')?x.replace(/\./g,'').replace(',','.') : x.replace(/,/g,'');
+    else if(x.includes(',')) x=x.replace(',','.');
+    const n=Number(x); return Number.isFinite(n)?Math.abs(n):NaN;
+  }
+  function cleanLines(text){
+    return String(text||'').replace(/\r/g,'').replace(/\u00a0/g,' ').split(/\n+/).map(x=>x.replace(/[|]/g,' ').replace(/[ \t]+/g,' ').trim()).filter(Boolean);
+  }
+  function is1CHeaderLine(line){
+    const t=String(line||'').toLowerCase();
+    const keys=['дата','номер','тип документа','информация','сумма'];
+    return keys.filter(k=>t.includes(k)).length>=3;
+  }
+  function maskPattern(line,re){ return line.replace(re,m=>' '.repeat(m.length)); }
+  function amountCandidates(text){
+    const lines=cleanLines(text); const out=[];
+    const rx=/((?:\d{1,3}(?:[ \u00a0.]\d{3})+|\d{4,}|\d{1,3})(?:[,.]\d{1,2})?)\s*(?:₽|руб\.?|р\b)?/gi;
+    lines.forEach((line,idx)=>{
+      let scan=line;
+      scan=maskPattern(scan,/\b[0-3]?\d[.\/-][01]?\d[.\/-](?:20\d{2}|\d{2})\b/g);
+      scan=maskPattern(scan,/\b[0-2]?\d:[0-5]\d(?::[0-5]\d)?\b/g);
+      scan=maskPattern(scan,/\b[0-9A-ZА-ЯЁ]{2,8}[-–—]\d{3,}\b/giu);
+      let m; while((m=rx.exec(scan))){
+        const raw=line.slice(m.index,m.index+m[0].length); const value=parseNumberToken(raw);
+        if(!Number.isFinite(value)||value<=0)continue;
+        const l=line.toLowerCase(); let score=0;
+        if(is1CHeaderLine(line))score-=60;
+        if(/[₽]/.test(raw))score+=12; if(/руб\.?|\bр\b/i.test(raw))score+=7;
+        if(/\d[ \u00a0.]\d{3}/.test(raw))score+=12;
+        if(/[,.]\d{2}\b/.test(raw))score+=8;
+        if(/итого|к оплате|сумма|всего|оплачено/.test(l))score+=9;
+        if(/продаж|приход|поступлен|оплата|платеж|платёж/.test(l))score+=4;
+        if(/расход|списан|покупк|поставщик/.test(l))score+=4;
+        if(/скидк|бонус|ндс|налог|%|процент|колич|шт/.test(l))score-=8;
+        if(value>=100)score+=2; if(value>=1000)score+=3; if(value>=10000)score+=2;
+        if(value<=31 && !/[,.]\d{2}|₽|руб/i.test(raw))score-=16;
+        else if(value<100 && !/[,.]\d{2}|₽|руб/i.test(raw))score-=7;
+        // В таблице 1С сумма обычно стоит справа — небольшое преимущество правым числам.
+        score += Math.min(7, Math.round((m.index/Math.max(1,scan.length))*7));
+        out.push({value,score,line,raw,idx,index:m.index});
+      }
+    });
+    return out.sort((a,b)=>b.score-a.score || b.index-a.index || b.value-a.value);
+  }
+  const DOC_PATTERNS = [
+    /плат[её]жное\s+поручение/i,
+    /списание\s+с\s+расч[её]тного\s+сч[её]та/i,
+    /поступление\s+на\s+расч[её]тный\s+сч[её]т/i,
+    /реализация\s+товаров(?:\s+и\s+услуг)?/i,
+    /поступление\s+товаров(?:\s+и\s+услуг)?/i,
+    /расходный\s+кассовый\s+ордер/i,
+    /приходный\s+кассовый\s+ордер/i,
+    /возврат\s+от\s+покупателя/i,
+    /возврат\s+поставщику/i,
+    /продажа/i,
+    /покупка/i
+  ];
+  function findDocumentType(line){
+    for(const re of DOC_PATTERNS){const m=String(line||'').match(re);if(m)return {text:m[0].replace(/\s+/g,' ').trim(),index:m.index,length:m[0].length};}
+    return null;
+  }
+  function findDocumentNumber(line){
+    const patterns=[/\b\d{3,8}[-–—]\d{3,10}\b/,/\b[A-ZА-ЯЁ0-9]{2,6}[-–—]\d{3,10}\b/iu];
+    for(const re of patterns){const m=String(line||'').match(re);if(m)return {text:m[0],index:m.index,length:m[0].length};}
+    return null;
+  }
+  function extract1CRow(text){
+    const lines=cleanLines(text).filter(l=>!is1CHeaderLine(l));
+    let best=null;
+    for(const line of lines){
+      const date=parseDateFromText(line); const doc=findDocumentType(line); const num=findDocumentNumber(line);
+      const sums=amountCandidates(line); const amount=sums[0]||null;
+      let score=(date?18:0)+(doc?18:0)+(num?5:0)+(amount?Math.max(0,amount.score)+12:0);
+      if(line.length>20)score+=2;
+      if(!best||score>best.score)best={line,date,doc,num,amount,score};
+    }
+    if(!best)return null;
+    let info='';
+    if(best.amount){
+      let start=0;
+      if(best.doc)start=best.doc.index+best.doc.length;
+      else if(best.num)start=best.num.index+best.num.length;
+      if(best.num && best.num.index>=start-3 && best.num.index<best.amount.index) start=Math.max(start,best.num.index+best.num.length);
+      const end=best.amount.index;
+      if(end>start)info=best.line.slice(start,end).replace(/^[\s:—–\-=]+|[\s:—–\-=]+$/g,'').trim();
+    }
+    if(best.num && info.includes(best.num.text))info=info.replace(best.num.text,'').replace(/^[\s:—–\-=]+/,'').trim();
+    return {line:best.line,date:best.date,documentType:best.doc?.text||'',documentNumber:best.num?.text||'',info,amount:best.amount?.value||'',amountRaw:best.amount?.raw||'',score:best.score};
+  }
+  function inferType(text,documentType=''){
+    const t=(String(documentType||'')+' '+String(text||'')).toLowerCase();
+    if(/возврат\s+от\s+покупателя/.test(t)) return 'expense';
+    if(/поступление\s+на\s+расч[её]тный|реализац|продаж|выручк|приходный\s+кассовый|оплата\s+от\s+покупател/.test(t)) return 'income';
+    if(/плат[её]жное\s+поручение|списание\s+с\s+расч[её]тного|расходный\s+кассовый|расход|покупк|оплата\s+поставщик|поставщику|закуп|выдача|возврат\s+поставщику/.test(t)) return 'expense';
+    return '';
+  }
+  function looksLikeCounterparty(s){
+    const x=String(s||'').trim();
+    if(/\b(?:ооо|ип|ао|пао|зао|оао)\b/i.test(x))return true;
+    return /^[А-ЯЁ][а-яё-]+(?:\s+[А-ЯЁ][а-яё-]+){1,3}$/u.test(x);
+  }
+  function inferCategory(text,type,documentType='',info=''){
+    const t=(String(text||'')+' '+String(documentType||'')+' '+String(info||'')).toLowerCase();
+    if(type==='income' && /продаж|выручк|реализац|покупател/.test(t))return 'Продажи';
+    if(/реклам|яндекс директ|vk|маркетинг/.test(t))return 'Реклама';
+    if(/такси|доставк|транспорт|бензин|топлив/.test(t))return 'Транспорт';
+    if(/аренд/.test(t))return 'Аренда';
+    if(/зарплат|аванс сотруд|оклад/.test(t))return 'Зарплата';
+    if(/налог|ндс|усн|фнс/.test(t))return 'Налоги';
+    if(/комисс/.test(t))return 'Комиссии';
+    if(/сервис|подписк|лиценз|хостинг|облак/.test(t))return 'Сервисы';
+    if(/оборудован|техник|ноутбук|телефон/.test(t))return 'Оборудование';
+    if(type==='expense' && /поставщик|поступление\s+товаров|покупк/.test(t))return 'Поставщики';
+    if(type==='expense' && (/плат[её]жное\s+поручение/.test(t)||looksLikeCounterparty(info)))return 'Подрядчики';
+    return '';
+  }
+  function extractLabel(text,label){ const re=new RegExp(`${label}\\s*[:—-]\\s*([^\\n]{2,80})`,'i'); const m=text.match(re); return m?m[1].trim():''; }
+  function inferProject(text){ return extractLabel(text,'проект') || extractLabel(text,'заказ') || extractLabel(text,'объект') || ''; }
+  function inferComment(text,type,row=null){
+    if(row){
+      const bits=[];
+      if(row.documentType)bits.push(row.documentType);
+      if(row.documentNumber)bits.push('№ '+row.documentNumber);
+      if(row.info)bits.push(row.info);
+      if(bits.length)return bits.join(' · ').slice(0,220);
+    }
+    const lines=cleanLines(text).filter(x=>!is1CHeaderLine(x));
+    const preferred=lines.find(l=>/продаж|поступлен|расход|списан|оплата|покупк|плат[её]ж/i.test(l) && l.length<220);
+    if(preferred) return preferred.replace(/\s+/g,' ').slice(0,220);
+    return type==='income'?'Продажа из 1С':type==='expense'?'Расход из 1С':'Операция из 1С';
+  }
+
+  // Режем OCR-текст по каждой новой дате. Это позволяет разбирать 10–20+ строк с одного скрина.
+  function split1CRecords(text){
+    const lines=cleanLines(text).filter(l=>!is1CHeaderLine(l));
+    const records=[]; let current='';
+    const dateRx=/\b[0-3]?\d[.\/-][01]?\d[.\/-](?:20\d{2}|\d{2})\b/g;
+    function pushCurrent(){ if(current.trim())records.push(current.replace(/\s+/g,' ').trim()); current=''; }
+    for(const rawLine of lines){
+      const line=rawLine.replace(/^[^0-9А-ЯA-ZЁ]+/iu,'').trim();
+      const matches=[...line.matchAll(dateRx)];
+      if(matches.length){
+        // Если Tesseract склеил несколько табличных строк в одну строку текста — делим и её.
+        for(let j=0;j<matches.length;j++){
+          const a=matches[j].index, b=j+1<matches.length?matches[j+1].index:line.length;
+          const part=line.slice(a,b).trim();
+          if(j===0)pushCurrent(); else pushCurrent();
+          current=part;
+        }
+      }else if(current){
+        // Перенесённое название документа/контрагента приклеиваем к предыдущей строке.
+        current+=' '+line;
+      }
+    }
+    pushCurrent();
+    return records.filter(r=>parseDateFromText(r) && (amountCandidates(r).length || findDocumentType(r) || findDocumentNumber(r)));
+  }
+  function parse1CRecord(text,confidence=0){
+    const clean=String(text||'').replace(/\r/g,'').replace(/[|]/g,' ').replace(/[ \t\n]+/g,' ').trim();
+    const row=extract1CRow(clean);
+    const type=inferType(clean,row?.documentType||'');
+    const candidates=amountCandidates(clean);
+    const amount=row?.amount || candidates[0]?.value || '';
+    const parsedDate=row?.date || parseDateFromText(clean);
+    const date=parsedDate || todayISO();
+    const info=row?.info||'';
+    const category=inferCategory(clean,type,row?.documentType||'',info);
+    const project=inferProject(clean);
+    const comment=inferComment(clean,type,row);
+    let score=Math.max(0,Math.min(100,Math.round(confidence||0)));
+    if(amount)score=Math.min(100,score+6); if(type)score=Math.min(100,score+4); if(parsedDate)score=Math.min(100,score+3);
+    return {date,project,type,category,amount,comment,text:clean,confidence:score,
+      amountLine:row?.line || candidates[0]?.line||'',documentType:row?.documentType||'',documentNumber:row?.documentNumber||'',counterparty:info};
+  }
+  function parse1CRows(text,confidence=0){
+    const records=split1CRecords(text);
+    let rows=records.map(r=>parse1CRecord(r,confidence)).filter(x=>x.amount || x.documentType || x.documentNumber);
+    if(!rows.length){
+      const fallback=parse1CRecord(text,confidence);
+      if(fallback.amount || fallback.documentType || fallback.documentNumber) rows=[fallback];
+    }
+    return rows;
+  }
+
+  async function imageForOcr(file){
+    let source,w0,h0,cleanup=()=>{};
+    if('createImageBitmap' in window){
+      source=await createImageBitmap(file);w0=source.width;h0=source.height;cleanup=()=>source.close?.();
+    }else{
+      const url=URL.createObjectURL(file); source=await new Promise((resolve,reject)=>{const img=new Image();img.onload=()=>resolve(img);img.onerror=reject;img.src=url;});w0=source.naturalWidth;h0=source.naturalHeight;cleanup=()=>URL.revokeObjectURL(url);
+    }
+    // Для длинных скринов 1С держим больше разрешение, иначе 15–20 строк становятся слишком мелкими.
+    const max=3400; const scale=Math.min(1.45,max/Math.max(w0,h0));
+    const w=Math.max(1,Math.round(w0*scale)),h=Math.max(1,Math.round(h0*scale));
+    const c=document.createElement('canvas');c.width=w;c.height=h;const ctx=c.getContext('2d',{willReadFrequently:true});ctx.drawImage(source,0,0,w,h); cleanup();
+    const im=ctx.getImageData(0,0,w,h),d=im.data;
+    for(let i=0;i<d.length;i+=4){let g=.299*d[i]+.587*d[i+1]+.114*d[i+2];g=(g-128)*1.18+128;g=Math.max(0,Math.min(255,g));d[i]=d[i+1]=d[i+2]=g;}
+    ctx.putImageData(im,0,0); return c;
+  }
+  function previewFromCanvas(canvas){
+    const maxW=900,scale=Math.min(1,maxW/canvas.width),w=Math.max(1,Math.round(canvas.width*scale)),h=Math.max(1,Math.round(canvas.height*scale));
+    const c=document.createElement('canvas');c.width=w;c.height=h;c.getContext('2d').drawImage(canvas,0,0,w,h);return c.toDataURL('image/jpeg',.72);
+  }
+  async function getOcrWorker(){
+    if(ocrWorker)return ocrWorker;
+    if(!window.Tesseract)throw new Error('OCR library not loaded');
+    ocrWorker=await Tesseract.createWorker('rus+eng',1,{logger:m=>{
+      if(m.status==='recognizing text') setOcrProgress(Math.round((m.progress||0)*100),`Распознаю строки…`);
+      else if(m.status) setOcrProgress(null,String(m.status).replace(/_/g,' '));
+    }});
+    try{await ocrWorker.setParameters({preserve_interword_spaces:'1',tessedit_pageseg_mode:'6'});}catch(e){}
+    return ocrWorker;
+  }
+  function setOcrProgress(pct,text){
+    $('#ocrProgress').classList.add('show'); if(text)$('#ocrProgressText').textContent=text; if(pct!=null){$('#ocrProgressPct').textContent=pct+'%';$('#ocrBar').style.width=pct+'%';}
+  }
+  function hideOcrProgress(){setTimeout(()=>$('#ocrProgress').classList.remove('show'),450);}
+  function ocrCategoryOptions(current){ const vals=['',...CATEGORIES]; if(current&&!vals.includes(current))vals.splice(1,0,current); return vals.map(v=>`<option value="${escapeHtml(v)}" ${v===current?'selected':''}>${v?escapeHtml(v):'—'}</option>`).join(''); }
+  function activeSourceItems(sourceId){return ocrItems.filter(x=>x.sourceId===sourceId);}
+  function cleanupOcrSources(){const ids=new Set(ocrItems.map(x=>x.sourceId));ocrSources=ocrSources.filter(s=>ids.has(s.id));}
+  function renderOcrResults(){
+    const total=ocrItems.length;
+    $('#addAllOcr').style.display=total?'inline-flex':'none'; $('#clearOcr').style.display=total?'inline-flex':'none';
+    $('#addAllOcr').textContent=total?`Добавить все (${total})`:'Добавить все';
+    const active=ocrSources.filter(src=>activeSourceItems(src.id).length);
+    $('#ocrResults').innerHTML=active.map(src=>{
+      const items=activeSourceItems(src.id);
+      return `<article class="ocr-result" data-source-id="${src.id}">
+        <div class="ocr-source-head">
+          <img class="ocr-thumb" src="${src.preview}" alt="${escapeHtml(src.fileName)}">
+          <div><div class="ocr-source-title">${escapeHtml(src.fileName)}</div><div class="ocr-source-meta"><span class="ocr-confidence ${src.confidence>=70?'good':'warn'}">OCR ${src.confidence}%</span> · один скрин разобран по строкам</div><div class="ocr-source-count">${items.length} <small>${items.length===1?'операция':'операций'}</small></div></div>
+          <div class="ocr-result-actions"><button class="smallbtn primary" data-add-source="${src.id}">Добавить ${items.length}</button><button class="smallbtn danger" data-remove-source="${src.id}">Убрать скрин</button></div>
+        </div>
+        <div class="ocr-table-scroll"><table class="ocr-review-table"><thead><tr><th>#</th><th>Дата</th><th>Тип</th><th>Сумма</th><th>Категория</th><th>Проект</th><th>Комментарий</th><th></th></tr></thead><tbody>
+        ${items.map((x,n)=>`<tr data-ocr-id="${x.id}"><td class="rowno">${n+1}</td><td class="od"><input data-of="date" type="date" value="${escapeHtml(x.date)}"></td><td class="ot"><select data-of="type">${options(TYPES,x.type)}</select></td><td class="oa"><input data-of="amount" type="number" min="0" step="0.01" inputmode="decimal" value="${x.amount||''}" placeholder="0"></td><td class="oc"><select data-of="category">${ocrCategoryOptions(x.category)}</select></td><td class="op"><input data-of="project" value="${escapeHtml(x.project)}" placeholder="—"></td><td class="ocom"><input data-of="comment" value="${escapeHtml(x.comment)}"></td><td class="orowact"><button title="Добавить" data-add-ocr="${x.id}">＋</button><button class="danger" title="Убрать" data-remove-ocr="${x.id}">×</button></td></tr>`).join('')}
+        </tbody></table></div>
+        <details class="ocr-raw"><summary>Показать распознанный текст всего скрина</summary><textarea data-source-text="${src.id}">${escapeHtml(src.text)}</textarea><div class="ocr-raw-actions"><button class="smallbtn" data-reparse-source="${src.id}">Переразобрать строки</button></div></details>
+      </article>`;
+    }).join('');
+  }
+  async function recognizeFiles(files){
+    const list=[...files].filter(f=>f.type.startsWith('image/')); if(!list.length)return;
+    try{
+      setOcrProgress(0,'Загружаю OCR-модуль…'); const worker=await getOcrWorker(); let totalFound=0;
+      for(let i=0;i<list.length;i++){
+        const f=list[i]; setOcrProgress(0,`Скрин ${i+1} из ${list.length}: подготовка…`); const canvas=await imageForOcr(f);
+        const preview=previewFromCanvas(canvas);
+        const ret=await worker.recognize(canvas); const rows=parse1CRows(ret.data.text,ret.data.confidence);
+        const sourceId=uid(); const confidence=Math.max(0,Math.min(100,Math.round(ret.data.confidence||0)));
+        ocrSources.push({id:sourceId,fileName:f.name||`Скрин ${ocrSources.length+1}`,preview,text:ret.data.text||'',confidence});
+        const prepared=rows.length?rows:[{date:todayISO(),project:'',type:'',category:'',amount:'',comment:'Не удалось автоматически разобрать строку',confidence,text:ret.data.text||''}];
+        prepared.forEach((r,n)=>ocrItems.push({...r,id:uid(),sourceId,rowNo:n+1})); totalFound+=prepared.length;
+        renderOcrResults(); setOcrProgress(100,`Скрин ${i+1}: найдено строк — ${prepared.length}`);
+      }
+      hideOcrProgress(); toast(`Подготовлено операций: ${totalFound}`);
+    }catch(err){console.error(err);hideOcrProgress();alert('OCR не запустился. В этой версии для загрузки OCR-модуля и языковой модели нужен интернет.');}
+  }
+  $('#ocrInput').addEventListener('change',e=>{ if(e.target.files?.length)recognizeFiles(e.target.files); e.target.value=''; });
+  const drop=$('#ocrDrop');
+  ['dragenter','dragover'].forEach(ev=>drop.addEventListener(ev,e=>{e.preventDefault();drop.classList.add('drag')}));
+  ['dragleave','drop'].forEach(ev=>drop.addEventListener(ev,e=>{e.preventDefault();drop.classList.remove('drag')}));
+  drop.addEventListener('drop',e=>{if(e.dataTransfer?.files?.length)recognizeFiles(e.dataTransfer.files)});
+
+  function findOcrItem(id){return ocrItems.find(x=>x.id===id);}
+  $('#ocrResults').addEventListener('input',e=>{
+    const f=e.target.dataset.of;if(!f)return;const id=e.target.closest('[data-ocr-id]')?.dataset.ocrId;const item=findOcrItem(id);if(!item)return;
+    item[f]=f==='amount'?(e.target.value===''?'':Math.abs(Number(e.target.value)||0)):e.target.value;
+  });
+  $('#ocrResults').addEventListener('change',e=>{
+    const f=e.target.dataset.of;if(!f)return;const id=e.target.closest('[data-ocr-id]')?.dataset.ocrId;const item=findOcrItem(id);if(!item)return;
+    item[f]=f==='amount'?(e.target.value===''?'':Math.abs(Number(e.target.value)||0)):e.target.value;
+  });
+  function addOcrObject(x,defer=false){
+    if(!x||!x.amount)return false;
+    let idx=state.operations.findIndex(o=>!isFilled(o)); if(idx<0){state.rowCount+=50;ensureRows();idx=state.operations.findIndex(o=>!isFilled(o));}
+    state.operations[idx]={id:uid(),date:x.date||todayISO(),autoDate:!x.date,project:x.project||'',type:x.type||'',category:x.category||'',amount:Math.abs(Number(x.amount)||0),comment:x.comment||''};
+    if(!defer){render();scheduleSave();} return idx;
+  }
+  function addOcrIds(ids){
+    let added=0,skipped=0,first=-1; const done=new Set();
+    ids.forEach(id=>{const x=findOcrItem(id);if(!x)return;const idx=addOcrObject(x,true);if(idx===false){skipped++;return;}done.add(id);added++;if(first<0)first=idx;});
+    if(added){ocrItems=ocrItems.filter(x=>!done.has(x.id));cleanupOcrSources();renderOcrResults();render();scheduleSave();}
+    if(added&&skipped)toast(`Добавлено ${added}, без суммы: ${skipped}`); else if(added)toast(`Добавлено операций: ${added}`); else if(skipped)toast('Укажи сумму в строках');
+    if(first>=0)requestAnimationFrame(()=>{$('#rows').querySelector(`tr[data-i="${first}"]`)?.scrollIntoView({block:'center',behavior:'smooth'});});
+  }
+  $('#ocrResults').addEventListener('click',e=>{
+    const add=e.target.closest('[data-add-ocr]'); if(add){addOcrIds([add.dataset.addOcr]);return;}
+    const rm=e.target.closest('[data-remove-ocr]'); if(rm){ocrItems=ocrItems.filter(x=>x.id!==rm.dataset.removeOcr);cleanupOcrSources();renderOcrResults();return;}
+    const addSrc=e.target.closest('[data-add-source]'); if(addSrc){addOcrIds(activeSourceItems(addSrc.dataset.addSource).map(x=>x.id));return;}
+    const rmSrc=e.target.closest('[data-remove-source]'); if(rmSrc){const sid=rmSrc.dataset.removeSource;ocrItems=ocrItems.filter(x=>x.sourceId!==sid);ocrSources=ocrSources.filter(x=>x.id!==sid);renderOcrResults();return;}
+    const reparse=e.target.closest('[data-reparse-source]'); if(reparse){
+      const sid=reparse.dataset.reparseSource,src=ocrSources.find(x=>x.id===sid);if(!src)return;
+      const ta=$(`#ocrResults textarea[data-source-text="${sid}"]`);if(ta)src.text=ta.value;
+      const rows=parse1CRows(src.text,src.confidence);ocrItems=ocrItems.filter(x=>x.sourceId!==sid);rows.forEach((r,n)=>ocrItems.push({...r,id:uid(),sourceId:sid,rowNo:n+1}));cleanupOcrSources();renderOcrResults();toast(`Найдено строк: ${rows.length}`);return;
+    }
+  });
+  $('#addAllOcr').addEventListener('click',()=>addOcrIds(ocrItems.map(x=>x.id)));
+  $('#clearOcr').addEventListener('click',()=>{ocrItems=[];ocrSources=[];renderOcrResults();});
+
+  function toast(text){ const t=$('#toast');t.textContent=text;t.classList.add('show');clearTimeout(toast.t);toast.t=setTimeout(()=>t.classList.remove('show'),1600); }
+
+  load();
+})();
+</script>
+</body>
+</html>
