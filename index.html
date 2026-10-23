@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="theme-color" content="#f4f4f6">
-<title>MoneyFlow v17.6 — учёт вкладов</title>
+<title>MoneyFlow v18.0 — Движение денег и долги</title>
 <style>
 :root{
   --bg:#f4f4f6;--card:#fff;--text:#111114;--muted:#73737b;--line:#e3e3e8;--soft:#f8f8fa;
@@ -252,6 +252,36 @@ body.resizing-col{user-select:none;-webkit-user-select:none;cursor:col-resize}
 @media(prefers-color-scheme:dark){.allocate-btn.has-alloc{background:#19362b;color:#94efc0;box-shadow:inset 0 0 0 1px #275f48}.allocate-btn.invalid-alloc{background:#482a2a;color:#ffb2a3;box-shadow:inset 0 0 0 1px #79413a}.allocated-label,.amount-share{color:#93b7ff}}
 @media(max-width:650px){.alloc-modal{padding:8px}.alloc-dialog{padding:13px}.alloc-columns,.alloc-line{grid-template-columns:minmax(0,1fr) 95px 35px;gap:4px}.alloc-line select,.alloc-line input{font-size:11px;padding:0 5px}.alloc-actions{flex-wrap:wrap}.alloc-balance b{font-size:14px}}
 
+/* v17.9 — контролируемая дебиторская задолженность */
+.debt-topline{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:9px;margin-bottom:10px}
+.debt-snapshot{font-size:11px;font-weight:750;color:var(--muted);border:1px solid var(--line);background:var(--card);padding:8px 11px;border-radius:11px}
+.debt-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-bottom:11px}
+.debt-kpi{background:var(--card);border:1px solid var(--line);border-radius:15px;padding:14px 15px;min-width:0}
+.debt-kpi.hero{background:linear-gradient(140deg,#17243a,#0d1728);border-color:#23344f;color:#f8fafc}
+.debt-kpi .dl{font-size:10px;text-transform:uppercase;letter-spacing:.065em;font-weight:790;color:var(--muted)}
+.debt-kpi.hero .dl,.debt-kpi.hero .ds{color:#b7c6d8}
+.debt-kpi .dv{font-weight:830;font-size:clamp(19px,1.6vw,28px);letter-spacing:-.035em;margin-top:10px;overflow-wrap:anywhere}
+.debt-kpi .ds{font-size:10px;color:var(--muted);line-height:1.45;margin-top:7px}
+.debt-kpi.danger .dv{color:var(--red)}
+.debt-alert{background:var(--soft);border:1px solid var(--line);border-radius:12px;padding:12px 14px;margin:10px 0;font-size:12px;line-height:1.5;color:var(--muted)}
+.debt-alert strong{color:var(--text)}
+.debt-table{min-width:1160px;width:100%;border-collapse:collapse}
+.debt-table th{position:sticky;top:0;background:var(--soft);padding:12px 11px;font-size:10px}
+.debt-table td{height:auto;background:var(--card);padding:11px 10px;font-size:12px;vertical-align:middle}
+.debt-table .r{text-align:right;white-space:nowrap}
+.debt-table .primary-name{font-weight:790;max-width:340px;overflow:hidden;text-overflow:ellipsis}
+.debt-table .quiet{font-size:10px;color:var(--muted);margin-top:4px}
+.debt-table .negative{color:var(--red);font-weight:820}
+.debt-table .positive{color:var(--green);font-weight:820}
+.debt-status{font-size:10px;font-weight:800;border-radius:8px;background:var(--soft);border:1px solid var(--line);padding:5px 8px;display:inline-block;white-space:nowrap}
+.debt-status.overdue{background:rgba(180,35,24,.10);color:#e25d52;border-color:rgba(180,35,24,.18)}
+.debt-status.upcoming{background:rgba(37,99,235,.09);color:#4382ef;border-color:rgba(37,99,235,.2)}
+.debt-status.paid{background:rgba(20,128,74,.1);color:#249c66;border-color:rgba(20,128,74,.18)}
+.debt-empty{padding:22px;color:var(--muted);text-align:center}
+@media(max-width:1050px){.debt-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:550px){.debt-grid{grid-template-columns:1fr}.debt-kpi{padding:12px}}
+@media(prefers-color-scheme:dark){.dash-mode-switch{background:#1b1d22;border-color:#323641;box-shadow:none}.dash-mode-btn{color:#adb3c0}.dash-mode-btn.active{background:#edf0f5;color:#11131a}.debt-status.overdue{color:#f07c73}.debt-status.upcoming{color:#82a9ff}.debt-status.paid{color:#55c690}}
+
 </style>
 </head>
 <body>
@@ -383,6 +413,7 @@ body.resizing-col{user-select:none;-webkit-user-select:none;cursor:col-resize}
         <button class="dash-mode-btn" data-dash-view="projects">Проекты</button>
         <button class="dash-mode-btn" data-dash-view="contracts">Договоры</button>
         <button class="dash-mode-btn" data-dash-view="shipments">Поставки</button>
+        <button class="dash-mode-btn" data-dash-view="debts">Долги заказчиков</button>
       </div>
 
       <div class="dashboard-stack" style="margin-top:10px">
@@ -390,6 +421,7 @@ body.resizing-col{user-select:none;-webkit-user-select:none;cursor:col-resize}
           <div class="kpi-grid-v12">
             <div class="kpi-card-v12 hero"><div class="kl">На счетах · доступно</div><div class="kv" id="ownCash">0 ₽</div><div class="ks" id="ownCashSub">остаток</div></div>
             <div class="kpi-card-v12 deposit-dashboard-card"><div class="kl">◆ На банковских вкладах</div><div class="kv" id="ownDeposits">0 ₽</div><div class="ks">по всей компании · не является расходом</div></div>
+            <div class="kpi-card-v12"><div class="kl">Осталось получить</div><div class="kv" id="ownDebts">0 ₽</div><div class="ks">по договорам · на дату отчёта</div></div>
             <div class="kpi-card-v12"><div class="kl">Выручка / приход</div><div class="kv" id="ownRevenue">0 ₽</div><div class="delta-chip" id="ownRevenueDelta">за период</div></div>
             <div class="kpi-card-v12" id="ownProfitCard"><div class="kl">Чистая прибыль*</div><div class="kv" id="ownProfit">0 ₽</div><div class="delta-chip" id="ownProfitDelta">за период</div></div>
             <div class="kpi-card-v12" id="ownMarginCard"><div class="kl">Чистая маржа</div><div class="kv" id="ownMargin">—</div><div class="ks">прибыль ÷ выручка</div></div>
@@ -607,6 +639,29 @@ body.resizing-col{user-select:none;-webkit-user-select:none;cursor:col-resize}
           </div>
           <div class="chart-card-v12" style="margin-top:10px"><div class="chart-head-v12"><div><div class="chart-title-v12">Поставки подробно</div><div class="chart-sub-v12">Проект → договор → поставка → срок оплаты → сумма → оплачено заказчиком → затраты → прибыль</div></div><div class="chart-meta-v12" id="shipTableMeta">—</div></div><div class="monthly-table-wrap"><table class="monthly-table"><thead><tr><th>Проект</th><th>Договор</th><th>Поставка</th><th>Дата отгрузки</th><th>Срок оплаты</th><th>Ожидаемая оплата</th><th>Статус</th><th class="r">Сумма поставки</th><th class="r">Оплачено заказчиком</th><th class="r">Осталось получить</th><th class="r">Оплата, %</th><th class="r">Прямые затраты</th><th class="r">ФОТ</th><th class="r">Налоги</th><th class="r">Все расходы</th><th class="r">Чистая прибыль</th><th class="r">Маржа</th><th class="r">Операций</th></tr></thead><tbody id="shipSummaryRows"></tbody></table></div></div>
         </div>
+        <div class="dash-view" data-dash-panel="debts">
+          <div class="debt-topline"><div><div class="exec-card-title">Долги и ожидаемые оплаты</div><div class="exec-card-sub">Что заказчики ещё должны по договорам, какие отгрузки неоплачены и где нарушены сроки</div></div><div class="debt-snapshot" id="debtAsOf">Остаток на сегодня</div></div>
+          <div class="debt-grid">
+            <div class="debt-kpi hero"><div class="dl" id="debtTotalLabel">Осталось получить по договорам</div><div class="dv" id="debtTotal">0 ₽</div><div class="ds">Без сложения договоров с входящими в них поставками</div></div>
+            <div class="debt-kpi danger"><div class="dl">Просроченные поставки</div><div class="dv" id="debtOverdue">0 ₽</div><div class="ds" id="debtOverdueMeta">По известным датам оплаты</div></div>
+            <div class="debt-kpi"><div class="dl">Ожидается за 30 дней</div><div class="dv" id="debtDue30">0 ₽</div><div class="ds">По срокам неоплаченных поставок</div></div>
+            <div class="debt-kpi"><div class="dl">Договоров с остатком</div><div class="dv" id="debtContractCount">0</div><div class="ds" id="debtContractsMeta">С ненулевым долгом</div></div>
+            <div class="debt-kpi"><div class="dl">Не оплачено по поставкам</div><div class="dv" id="debtShipmentOpen">0 ₽</div><div class="ds">Прямые платежи, привязанные к каждой поставке</div></div>
+            <div class="debt-kpi"><div class="dl">Оплаты только по договору</div><div class="dv" id="debtUnallocatedPaid">0 ₽</div><div class="ds">Уменьшают долг договора, но не отдельных поставок</div></div>
+            <div class="debt-kpi"><div class="dl">Оплачено заказчиками</div><div class="dv" id="debtPaid">0 ₽</div><div class="ds">Поступления по выбранным договорам</div></div>
+            <div class="debt-kpi"><div class="dl">Поставок с просрочкой</div><div class="dv" id="debtOverdueCount">0</div><div class="ds">Только поставки с датой и сроком оплаты</div></div>
+          </div>
+          <div class="debt-alert" id="debtCaution"><strong>Важно:</strong> «Осталось получить» — ожидаемые поступления по суммам договоров, не вся сумма обязательно просрочена или уже признана дебиторской задолженностью.</div>
+          <div class="chart-grid-v12">
+            <div class="chart-card-v12"><div class="chart-head-v12"><div><div class="chart-title-v12">Крупнейшие долги по проектам</div><div class="chart-sub-v12">Осталось получить по договорам проектов</div></div><div class="chart-meta-v12" id="debtProjectMeta">—</div></div><div class="expense-bars" id="debtProjectBars"></div></div>
+            <div class="chart-card-v12"><div class="chart-head-v12"><div><div class="chart-title-v12">Крупнейшие долги по договорам</div><div class="chart-sub-v12">Без повторного прибавления поставок</div></div><div class="chart-meta-v12" id="debtContractMeta">—</div></div><div class="expense-bars" id="debtContractBars"></div></div>
+            <div class="chart-card-v12"><div class="chart-head-v12"><div><div class="chart-title-v12">Просрочка по длительности</div><div class="chart-sub-v12">Неоплаченные поставки по сроку просрочки</div></div><div class="chart-meta-v12">на дату отчёта</div></div><div class="chart-host-v12" id="debtAgingBars"></div></div>
+            <div class="chart-card-v12"><div class="chart-head-v12"><div><div class="chart-title-v12">Календарь ожидаемых оплат</div><div class="chart-sub-v12">По датам отгрузок и срокам платежей · 12 месяцев</div></div><div class="chart-meta-v12" id="debtScheduleMeta">—</div></div><div class="chart-host-v12" id="debtScheduleBars"></div></div>
+          </div>
+          <div class="chart-card-v12" style="margin-top:12px"><div class="chart-head-v12"><div><div class="chart-title-v12">Долги по договорам</div><div class="chart-sub-v12">Сумма договора → получено → осталось; поставки здесь не суммируются повторно</div></div><div class="chart-meta-v12" id="debtContractTableMeta">—</div></div><div class="monthly-table-wrap"><table class="debt-table"><thead><tr><th>Проект</th><th>Договор</th><th>Контрагент</th><th class="r">Сумма / основание</th><th class="r">Оплачено</th><th class="r">Осталось получить</th><th class="r">Оплата</th><th class="r">Поставок</th><th>Оплаты</th></tr></thead><tbody id="debtContractRows"></tbody></table></div></div>
+          <div class="chart-card-v12" style="margin-top:12px"><div class="chart-head-v12"><div><div class="chart-title-v12">Долги по поставкам</div><div class="chart-sub-v12">Сумма отгрузки, получено именно по ней, ожидаемая дата и просрочка</div></div><div class="chart-meta-v12" id="debtShipmentTableMeta">—</div></div><div class="monthly-table-wrap"><table class="debt-table"><thead><tr><th>Проект / договор</th><th>Поставка</th><th>Отгрузка</th><th>План оплаты</th><th>Статус</th><th class="r">Сумма</th><th class="r">Оплачено</th><th class="r">Осталось</th><th class="r">Оплата</th><th>Операции</th></tr></thead><tbody id="debtShipmentRows"></tbody></table></div></div>
+          <div class="note-v12" style="margin-top:12px">Учёт: долг по договору = max(0, сумма договора − все поступления, привязанные к договору). Если сумма договора не указана, берётся сумма его поставок. Долг по поставке = max(0, сумма поставки − платежи, привязанные к ней). Общий долг считается только по договорам; суммы двух таблиц не складываются. Дашборд строит остатки <strong>на дату</strong>, указанную в фильтре года/месяца. Это управленческий расчёт ожидаемых оплат, не бухгалтерский реестр дебиторской задолженности.</div>
+        </div>
       </div>
     </div>
   </section>
@@ -649,7 +704,7 @@ body.resizing-col{user-select:none;-webkit-user-select:none;cursor:col-resize}
 (() => {
 'use strict';
 const STORAGE_KEY='pnl-ipad-v2';
-const VERSION='17.6', INITIAL_ROWS=100, INITIAL_AGREEMENTS=40, INITIAL_SHIPMENTS=60;
+const VERSION='18.0', INITIAL_ROWS=100, INITIAL_AGREEMENTS=40, INITIAL_SHIPMENTS=60;
 const TYPES=[['','—'],['income','Приход'],['expense','Расход']];
 const INCOME_CATEGORIES=['Выручка','Авансы / предоплаты','Возвраты','Вклад','Прочее'];
 const EXPENSE_CATEGORIES=['Бух. сопровождение','Выдача под отчет','Зарплата сотрудников','Лаб. сопровождение','Офис','Почтовые, курьерские услуги','Сервисы','НДС','НДФЛ','Налог на прибыль','Налоги','Штрафы','Пени','Подрядчики','Материалы / закупки','Аренда','Маркетплейсы','Логистика','Оборудование','Комиссии банка','Дивиденды','Вклад','Прочее'];
@@ -795,14 +850,15 @@ function operationMatchesHierarchy(o,project='',agreementId='',shipmentId=''){
  return allocatedParts(o).some(part=>(!project||resolvedProject(part)===project)&&(!agreementId||resolvedAgreementId(part)===agreementId)&&(!shipmentId||part.shipmentId===shipmentId));
 }
 function movementVisibleParts(o){return allocatedParts(o).filter(part=>(!movementView.project||resolvedProject(part)===movementView.project)&&(!movementView.agreementId||resolvedAgreementId(part)===movementView.agreementId)&&(!movementView.shipmentId||part.shipmentId===movementView.shipmentId));}
-function signed(o){return isDepositOp(o)?0:cashSigned(o);}
+function signed(o){return (isDepositOp(o)||isArchiveTransfer(o))?0:(o.legacyTaxNonbank ? -Math.abs(Number(o.amount)||0) : cashSigned(o));}
 function options(list,current){return list.map(([v,l])=>`<option value="${escapeHtml(v)}" ${v===current?'selected':''}>${escapeHtml(l)}</option>`).join('');}
 function categoryOptions(current='',type=''){let vals=[...new Set(type==='income'?INCOME_CATEGORIES:type==='expense'?EXPENSE_CATEGORIES:[...INCOME_CATEGORIES,...EXPENSE_CATEGORIES])];if(current&&!vals.includes(current))vals=[current,...vals];return `<option value="">—</option>`+vals.map(v=>`<option value="${escapeHtml(v)}" ${v===current?'selected':''}>${escapeHtml(v)}</option>`).join('');}
 function normCat(v){return String(v||'').trim().toLowerCase();}
 function isDepositOp(o){return !!o&&(o.type==='income'||o.type==='expense')&&normCat(o.category)==='вклад';}
 function isDividendOp(o){return o?.type==='expense'&&normCat(o.category)==='дивиденды';}
 function taxDetailName(o){const c=normCat(o?.category);return c==='ндс'?'НДС':c==='ндфл'?'НДФЛ':c==='налог на прибыль'?'Налог на прибыль':'Налоги / прочие';}
-function cashSigned(o){const a=Math.abs(Number(o.amount)||0);return o.type==='expense'?-a:o.type==='income'?a:0;}
+function cashSigned(o){if(o.legacyTaxNonbank)return 0;const a=Math.abs(Number(o.amount)||0);return o.type==='expense'?-a:o.type==='income'?a:0;}
+function isArchiveTransfer(o){return !!o?.legacyInternalTransfer;}
 function depositFlow(ops){let placed=0,returned=0;ops.forEach(o=>{if(!isDepositOp(o))return;const amount=Math.abs(Number(o.amount)||0);if(o.type==='expense')placed+=amount;else returned+=amount;});return {placed,returned,balance:placed-returned};}
 function isTaxOp(o){return o?.type==='expense'&&TAX_ALIASES.includes(normCat(o.category));}
 function isPayrollOp(o){return o?.type==='expense'&&PAYROLL_CATEGORIES.some(x=>normCat(x)===normCat(o.category));}
@@ -826,8 +882,13 @@ function normalize(raw){
   const operations=oldOps.map(o=>{
     const info=String(o.info||o.comment||''),project=String(o.project||''),type=o.type==='income'||o.type==='expense'?o.type:'',category=String(o.category||''),amount=o.amount===''?'':(Number.isFinite(Number(o.amount))?Math.abs(Number(o.amount)):'');
     const shipmentId=String(o.shipmentId||''),agreementId=String(o.agreementId||'');
-    const hasData=!!(project||agreementId||shipmentId||type||category||info||Number(amount));
-    return{id:o.id||uid(),date:String(o.date||(!hasData?todayISO():'')),autoDate:o.autoDate===true||(!hasData&&!o.date),project,agreementId,shipmentId,type,category,amount,info,
+    const legacyInternalTransfer=(!!o.legacyInternalTransfer&&category==='Внутренний перевод (архив)')||category==='ЕНС · Пополнение'||category==='ЕНС · Возврат';
+    const legacyTaxNonbank=(!!o.legacyTaxNonbank&&TAX_ALIASES.includes(normCat(category)))||(o.account==='ens'&&type==='expense'&&TAX_ALIASES.includes(normCat(category)));
+    // Старые пополнения/возвраты сохраняются как движение банка, но не доход/затрата.
+    // Списанный ранее с аванса налог остаётся налоговым расходом, без второго дебета банка.
+    const normalizedCategory=legacyInternalTransfer?'Внутренний перевод (архив)':category;
+    const hasData=!!(project||agreementId||shipmentId||type||normalizedCategory||info||Number(amount));
+    return{id:o.id||uid(),date:String(o.date||(!hasData?todayISO():'')),autoDate:o.autoDate===true||(!hasData&&!o.date),project,agreementId,shipmentId,type,category:normalizedCategory,amount,info,legacyInternalTransfer,legacyTaxNonbank,
       allocations:Array.isArray(o.allocations)?o.allocations.map(r=>({shipmentId:String(r.shipmentId||''),amount:Math.round(Number(r.amount||0)*100)/100})).filter(r=>r.shipmentId&&Number.isFinite(r.amount)&&r.amount>0):[]};
   });
   const hcRaw=s.headcountByMonth&&typeof s.headcountByMonth==='object'?s.headcountByMonth:{};const headcountByMonth={};Object.entries(hcRaw).forEach(([k,v])=>{if(/^\d{4}-\d{2}$/.test(k)&&Number(v)>=0)headcountByMonth[k]=Math.max(0,Math.round(Number(v)||0));});
@@ -847,7 +908,14 @@ function ensureRows(){
   });
 }
 function load(){
-  try{const raw=localStorage.getItem(STORAGE_KEY);if(raw)state=normalize(JSON.parse(raw));}catch(e){console.warn(e)}
+  try{const raw=localStorage.getItem(STORAGE_KEY);if(raw){
+    const data=JSON.parse(raw);
+    if((Number(data.ensOpeningBalance)||0)>0||(Array.isArray(data.operations)&&data.operations.some(o=>o.account==='ens'||o.category==='ЕНС · Пополнение'||o.category==='ЕНС · Возврат'))){
+      const key='moneyflow-legacy-pre-ens-removal-v18';
+      if(!localStorage.getItem(key))localStorage.setItem(key,raw);
+    }
+    state=normalize(data);
+  }}catch(e){console.warn(e)}
   ensureRows();$('#startBudget').value=formatMoneyInputValue(state.startBudget,true);renderAll();updateSaveText(state.updatedAt?'Сохранено локально':'Автосохранение включено');
 }
 function scheduleSave(){clearTimeout(saveTimer);updateSaveText('Сохраняю…');saveTimer=setTimeout(()=>{state.updatedAt=nowISO();try{localStorage.setItem(STORAGE_KEY,JSON.stringify(state));updateSaveText('Сохранено '+new Date().toLocaleTimeString('ru-RU',{hour:'2-digit',minute:'2-digit'}));}catch(e){updateSaveText('Не удалось сохранить');toast('Ошибка автосохранения')}},180)}
@@ -862,8 +930,8 @@ function initResizableTables(){const saved=readColumnWidths();document.querySele
 
 function totals(ops=state.operations.filter(isOpFilled)){
  let income=0,expense=0;ops.forEach(o=>{const v=signed(o);if(v>0)income+=v;if(v<0)expense+=Math.abs(v)});
- const d=depositFlow(ops),net=income-expense,cashNet=net-d.balance;
- return{income,expense,net,cashNet,current:(Number(state.startBudget)||0)+cashNet,onDeposit:d.balance,totalMoney:(Number(state.startBudget)||0)+net,depositPlaced:d.placed,depositReturned:d.returned};
+ const d=depositFlow(ops),net=income-expense,cashNet=ops.reduce((sum,o)=>sum+cashSigned(o),0);
+ return{income,expense,net,cashNet,current:(Number(state.startBudget)||0)+cashNet,onDeposit:d.balance,totalMoney:(Number(state.startBudget)||0)+cashNet+d.balance,depositPlaced:d.placed,depositReturned:d.returned};
 }
 function renderSummary(){const t=totals();$('#income').textContent=money(t.income);$('#expense').textContent=money(t.expense);$('#net').textContent=money(t.net);$('#currentBudget').textContent=money(t.current);$('#depositBalance').textContent=money(t.onDeposit);$('#allMoney').textContent=money(t.totalMoney);$('#netBox').classList.toggle('pos',t.net>0);$('#netBox').classList.toggle('neg',t.net<0);$('#depositMetric').classList.toggle('negative-deposit',t.onDeposit<0);}
 function projectNames(){const set=new Set();state.agreements.forEach(a=>{if(a.project.trim())set.add(a.project.trim())});state.operations.filter(isOpFilled).forEach(o=>{const p=resolvedProject(o).trim();if(p)set.add(p)});return [...set].sort((a,b)=>a.localeCompare(b,'ru'));}
@@ -1082,7 +1150,71 @@ function renderShipmentsView(ops,baseOps,fin){const rows=shipmentDashboardRows(o
  const schedule=payRows.slice().sort((a,b)=>String(a.payment.due).localeCompare(String(b.payment.due))),uh=$('#shipUpcomingRows');setText('#shipUpcomingMeta',schedule.length?`${schedule.length} поставок`:'—');if(uh)uh.innerHTML=schedule.slice(0,14).map(r=>`<tr><td>${escapeHtml(formatDateShort(r.payment.due))}</td><td>${escapeHtml(r.a?.project||'—')}</td><td>${escapeHtml(r.a?.contract||'—')}</td><td><strong>${escapeHtml(r.name)}</strong></td><td class="${r.payment.kind==='overdue'?'bad':r.payment.kind==='today'?'good':''}">${escapeHtml(r.payment.status)}</td><td class="r ${r.payment.kind==='overdue'?'bad':'good'}">${money(r.payment.remaining)}</td></tr>`).join('')||'<tr><td colspan="6" style="text-align:center;color:var(--muted);padding:24px">Нет ожидаемых оплат</td></tr>';
  const h=$('#shipSummaryRows');setText('#shipTableMeta',rows.length?`${rows.length} поставок`:'—');if(h)h.innerHTML=rows.length?rows.sort((a,b)=>b.ff.revenue+b.ff.expense-(a.ff.revenue+a.ff.expense)).map(r=>{const rem=r.plan>0?r.plan-r.ff.revenue:null,pct=r.plan>0?r.ff.revenue/r.plan*100:null,p=r.payment;return `<tr><td>${escapeHtml(r.a?.project||'—')}</td><td>${escapeHtml(r.a?.contract||'—')}</td><td><strong>${escapeHtml(r.name)}</strong></td><td>${escapeHtml(r.x.date?formatDateShort(r.x.date):'—')}</td><td>${escapeHtml(paymentTermLabel(r.x.paymentTerm))}</td><td>${escapeHtml(p.due?formatDateShort(p.due):'—')}</td><td class="${p.kind==='overdue'?'bad':p.kind==='paid'?'good':''}">${escapeHtml(p.status)}</td><td class="r">${r.plan?money(r.plan):'—'}</td><td class="r good">${r.ff.revenue?money(r.ff.revenue):'—'}</td><td class="r ${rem!=null&&rem<0?'bad':''}">${rem==null?'—':money(rem)}</td><td class="r ${pct!=null&&pct>100?'bad':''}">${fmtPct(pct)}</td><td class="r">${r.ff.directCosts?money(r.ff.directCosts):'—'}</td><td class="r">${r.ff.payroll?money(r.ff.payroll):'—'}</td><td class="r">${r.ff.taxes?money(r.ff.taxes):'—'}</td><td class="r">${r.ff.expense?money(r.ff.expense):'—'}</td><td class="r ${r.ff.netProfit>=0?'good':'bad'}">${r.st.count?(r.ff.netProfit>=0?'+':'')+money(r.ff.netProfit):'—'}</td><td class="r ${r.ff.netMargin!=null&&r.ff.netMargin>=0?'good':'bad'}">${fmtPct(r.ff.netMargin)}</td><td class="r">${r.st.count}</td></tr>`}).join(''):'<tr><td colspan="18" style="text-align:center;color:var(--muted);padding:26px">Нет поставок</td></tr>';
 }
-function renderDashboard(){renderDashboardFilters();const f=dashboardSelection(),ops=filteredOps(),baseOps=filteredOps({ignorePeriod:true}),fin=financialMetrics(ops),global={...totals(),current:selectionCashBalance(f)},timeline=dashboardTimeline(baseOps,f);const ctx=[];if(f.month)ctx.push(monthLabel(f.month));else if(f.year)ctx.push(f.year+' год');else ctx.push('Все годы');if(f.project)ctx.push(f.project);if(f.agreement){const a=agreementById(f.agreement);if(a)ctx.push(a.contract)}if(f.shipment){const sh=shipmentById(f.shipment);if(sh)ctx.push(sh.name)}setText('#dashContextLabel',ctx.join(' · '));$$('.dash-view').forEach(x=>x.classList.toggle('active',x.dataset.dashPanel===activeDashboardView));$$('.dash-mode-btn').forEach(x=>x.classList.toggle('active',x.dataset.dashView===activeDashboardView));renderOwner(ops,baseOps,timeline,fin,global);renderProfit(ops,baseOps,timeline,fin);renderCash(ops,baseOps,timeline,fin,global);renderPayroll(ops,baseOps,timeline,fin);renderTaxes(ops,baseOps,timeline,fin);const detailOps=filteredOps({expand:true}),detailBaseOps=filteredOps({ignorePeriod:true,expand:true});renderProjectsView(detailOps,detailBaseOps,financialMetrics(detailOps));renderContractsView(detailOps,detailBaseOps,financialMetrics(detailOps));renderShipmentsView(detailOps,detailBaseOps,financialMetrics(detailOps));}
+function receivablesSnapshot(filter=dashboardSelection()){
+ const asOf=filter.month?addCalendarDaysISO(filter.month+'-01',new Date(Number(filter.month.slice(0,4)),Number(filter.month.slice(5,7)),0).getDate()-1):filter.year?`${filter.year}-12-31`:todayISO();
+ const originalOps=state.operations.filter(isOpFilled).filter(o=>o.type==='income'&&!isDepositOp(o)&&!isArchiveTransfer(o)&&/^\d{4}-\d{2}-\d{2}$/.test(String(o.date||''))&&o.date<=asOf);
+ const receiptParts=expandAllocatedOps(originalOps);
+ const byAgreement=new Map(),byShipment=new Map();
+ for(const part of receiptParts){const val=Math.abs(Number(part.amount)||0);if(!val)continue;const aid=resolvedAgreementId(part);if(aid){if(!byAgreement.has(aid))byAgreement.set(aid,{paid:0,direct:0,unallocated:0});const t=byAgreement.get(aid);t.paid+=val;if(part.shipmentId)t.direct+=val;else t.unallocated+=val;}if(part.shipmentId)byShipment.set(part.shipmentId,(byShipment.get(part.shipmentId)||0)+val);}
+ const shipmentRows=state.shipments.filter(x=>isShipmentFilled(x)&&x.agreementId&&(!x.date||x.date<=asOf)).map(x=>{const a=agreementById(x.agreementId);const amount=Math.max(0,Number(x.amount)||0),paid=byShipment.get(x.id)||0,open=Math.max(0,amount-paid),due=expectedPaymentDate(x);const days=due?dayDiff(due,asOf):null;const kind=amount<=0?'unknown':open<=0?'paid':due&&days>0?'overdue':due?'upcoming':'none';return{x,a,amount,paid,open,due,days,kind}}).filter(r=>r.a&&(!filter.project||r.a.project===filter.project)&&(!filter.agreement||r.a.id===filter.agreement)&&(!filter.shipment||r.x.id===filter.shipment));
+ const allShipmentRows=state.shipments.filter(x=>isShipmentFilled(x)&&x.agreementId&&(!x.date||x.date<=asOf)).map(x=>({x,amount:Math.max(0,Number(x.amount)||0)}));
+ const shipmentPlans=new Map();for(const {x,amount} of allShipmentRows)shipmentPlans.set(x.agreementId,(shipmentPlans.get(x.agreementId)||0)+amount);
+ const agreementRows=state.agreements.filter(isAgreementFilled).filter(a=>(!a.date||a.date<=asOf)&&(!filter.project||a.project===filter.project)&&(!filter.agreement||a.id===filter.agreement)&&(!filter.shipment||shipmentById(filter.shipment)?.agreementId===a.id)).map(a=>{const amount=Math.max(0,Number(a.amount)||0),shipPlan=shipmentPlans.get(a.id)||0,plan=amount>0?amount:shipPlan,paid=byAgreement.get(a.id)?.paid||0,unallocated=byAgreement.get(a.id)?.unallocated||0,open=Math.max(0,plan-paid),shipments=allShipmentRows.filter(s=>s.x.agreementId===a.id).length;return{a,amount,shipPlan,plan,paid,unallocated,open,shipments,source:amount>0?'contract':'shipments'}});
+ // Если выбрана одна отгрузка, показываем её долг отдельно, не весь договор.
+ const totalOpen=filter.shipment?shipmentRows.reduce((sum,r)=>sum+r.open,0):agreementRows.reduce((sum,r)=>sum+r.open,0);
+ const allOpenShips=shipmentRows.filter(x=>x.open>0),overdue=allOpenShips.filter(x=>x.kind==='overdue');
+ const totalPaid=filter.shipment?shipmentRows.reduce((sum,r)=>sum+r.paid,0):agreementRows.reduce((sum,r)=>sum+r.paid,0);
+ return{asOf,agreementRows,shipmentRows,totalOpen,totalPaid,
+   shipmentOpen:shipmentRows.reduce((sum,r)=>sum+r.open,0),unallocated:agreementRows.reduce((sum,r)=>sum+r.unallocated,0),
+   overdue:overdue.reduce((sum,r)=>sum+r.open,0),overdueCount:overdue.length,
+   due30:allOpenShips.filter(r=>r.due&&r.due>=asOf&&dayDiff(asOf,r.due)<=30).reduce((sum,r)=>sum+r.open,0),
+   unlinkedProjectPaid:receiptParts.filter(o=>!resolvedAgreementId(o)&&resolvedProject(o)&&(!filter.project||resolvedProject(o)===filter.project)).reduce((sum,o)=>sum+Number(o.amount||0),0)
+ };
+}
+function renderReceivables(){
+ const d=receivablesSnapshot(),f=dashboardSelection();
+ setText('#debtAsOf',`Остатки на ${d.asOf.split('-').reverse().join('.')}`);
+ setText('#debtTotalLabel',f.shipment?'Осталось получить по поставке':'Осталось получить по договорам');
+ setText('#debtTotal',money(d.totalOpen));setText('#ownDebts',money(d.totalOpen));
+ setText('#debtOverdue',money(d.overdue));setText('#debtDue30',money(d.due30));
+ setText('#debtOverdueCount',String(d.overdueCount));
+ setText('#debtOverdueMeta',`${d.overdueCount} поставок с просрочкой`);
+ setText('#debtContractCount',String(d.agreementRows.filter(r=>r.open>0).length));
+ setText('#debtContractsMeta',`${d.agreementRows.length} договоров в выборке`);
+ setText('#debtShipmentOpen',money(d.shipmentOpen));setText('#debtUnallocatedPaid',money(d.unallocated));setText('#debtPaid',money(d.totalPaid));
+ const projects=new Map();d.agreementRows.forEach(r=>projects.set(r.a.project||'Без проекта',(projects.get(r.a.project||'Без проекта')||0)+r.open));
+ renderHBarsV12('#debtProjectBars',[...projects].map(([name,value])=>({name,value})).filter(r=>r.value>0).sort((a,b)=>b.value-a.value),'#debtProjectMeta',12);
+ renderHBarsV12('#debtContractBars',d.agreementRows.filter(r=>r.open>0).sort((a,b)=>b.open-a.open).map(r=>({name:`${r.a.project||'Без проекта'} · ${r.a.contract||'Без номера'}`,value:r.open})),'#debtContractMeta',12);
+ const ageBuckets=[{key:'1–7 дн.',low:1,high:7,value:0},{key:'8–30 дн.',low:8,high:30,value:0},{key:'31–60 дн.',low:31,high:60,value:0},{key:'61–90 дн.',low:61,high:90,value:0},{key:'90+ дн.',low:91,high:1e6,value:0}];
+ d.shipmentRows.filter(r=>r.kind==='overdue').forEach(r=>{const b=ageBuckets.find(b=>r.days>=b.low&&r.days<=b.high);if(b)b.value+=r.open;});
+ groupedBarsV12('#debtAgingBars',ageBuckets.map((r,i)=>({key:r.key,amount:r.value})),[{key:'amount',label:'просрочка по отгрузкам',color:'#b42318'}]);
+ const start=monthKey(d.asOf),dueMonths=[];for(let i=-2;i<10;i++){const key=monthShift(start,i);dueMonths.push({key,amount:d.shipmentRows.filter(r=>r.open>0&&r.due&&monthKey(r.due)===key).reduce((sum,r)=>sum+r.open,0)});}
+ groupedBarsV12('#debtScheduleBars',dueMonths,[{key:'amount',label:'план оплаты',color:'#2563eb'}]);setText('#debtScheduleMeta','12 месяцев');
+ const mismatched=d.agreementRows.filter(r=>r.amount>0&&r.shipPlan>r.amount+0.01).length;
+ const negativeReconcile=d.agreementRows.filter(r=>d.shipmentRows.filter(s=>s.a?.id===r.a.id).reduce((sum,x)=>sum+x.open,0)>r.open+0.01).length;
+ const notes=['<strong>Как читать:</strong> итог по договорам и остатки по поставкам не складываются: поставки вложены в договоры. План по договору может включать ещё не отгруженные объёмы.'];
+ if(f.shipment)notes.push('При выбранной поставке верхняя сумма относится только к ней, а таблица договоров показывает полный договор для контекста.');
+ if(d.unallocated>0.005)notes.push(`На ${money(d.unallocated)} заказчики оплатили договоры без указания поставки. Эти платежи уже уменьшают общий остаток, но ещё не распределены по отгрузкам.`);
+ if(negativeReconcile)notes.push(`По ${negativeReconcile} договорам долги отдельных поставок превышают остаток договора: проверь привязки полученных оплат.`);
+ if(mismatched)notes.push(`${mismatched} договоров имеют суммы поставок выше суммы самого договора.`);
+ if(d.unlinkedProjectPaid>0)notes.push(`Есть ${money(d.unlinkedProjectPaid)} поступлений с проектом, но без договора. Они не уменьшают долг по конкретному договору.`);
+ const warningHost=$('#debtCaution');if(warningHost)warningHost.innerHTML=notes.join(' ');
+ const contractHost=$('#debtContractRows');setText('#debtContractTableMeta',`${d.agreementRows.length} договоров`);
+ if(contractHost)contractHost.innerHTML=d.agreementRows.slice().sort((a,b)=>b.open-a.open).map(r=>`<tr><td>${escapeHtml(r.a.project||'—')}</td><td><div class="primary-name">${escapeHtml(r.a.contract||'Без номера')}</div><div class="quiet">${escapeHtml(r.a.date||'')}</div></td><td>${escapeHtml(r.a.counterparty||'—')}</td><td class="r">${money(r.plan)}${r.source==='shipments'?'<div class="quiet">по сумме поставок</div>':''}</td><td class="r positive">${money(r.paid)}${r.unallocated?`<div class="quiet">без поставки ${money(r.unallocated)}</div>`:''}</td><td class="r ${r.open>0?'negative':''}">${money(r.open)}</td><td class="r">${r.plan>0?fmtPct(Math.min(100,r.paid/r.plan*100)):'—'}</td><td class="r">${r.shipments}</td><td><button class="smallbtn" data-debt-agreement="${escapeHtml(r.a.id)}">Поступления ↗</button></td></tr>`).join('')||'<tr><td colspan="9" class="debt-empty">Нет договоров в выбранном срезе</td></tr>';
+ const shipmentHost=$('#debtShipmentRows');setText('#debtShipmentTableMeta',`${d.shipmentRows.length} поставок`);
+ if(shipmentHost)shipmentHost.innerHTML=d.shipmentRows.slice().sort((a,b)=>b.open-a.open||String(a.due).localeCompare(String(b.due))).map(r=>{const status=r.amount<=0?'Сумма не задана':r.open<=0?'Оплачено':r.kind==='overdue'?`Просрочено ${r.days} дн.`:r.due?`До ${r.due.split('-').reverse().join('.')}`:'Срок не задан';return `<tr><td><div class="primary-name">${escapeHtml(r.a?.project||'—')}</div><div class="quiet">${escapeHtml(r.a?.contract||'—')}</div></td><td><strong>${escapeHtml(r.x.name||'Без названия')}</strong></td><td>${escapeHtml(r.x.date?r.x.date.split('-').reverse().join('.'):'—')}</td><td>${escapeHtml(r.due?r.due.split('-').reverse().join('.'):'—')}<div class="quiet">${escapeHtml(paymentTermLabel(r.x.paymentTerm))}</div></td><td><span class="debt-status ${r.kind}">${escapeHtml(status)}</span></td><td class="r">${money(r.amount)}</td><td class="r positive">${money(r.paid)}</td><td class="r ${r.open>0?'negative':''}">${money(r.open)}</td><td class="r">${r.amount>0?fmtPct(Math.min(100,r.paid/r.amount*100)):'—'}</td><td><button class="smallbtn" data-debt-shipment="${escapeHtml(r.x.id)}">Поступления ↗</button></td></tr>`;}).join('')||'<tr><td colspan="10" class="debt-empty">Нет поставок в выбранном срезе</td></tr>';
+}
+
+// Переход к фактическим поступлениям по выбранному договору или отгрузке.
+['#debtContractRows','#debtShipmentRows'].forEach(selector=>$(selector).addEventListener('click',e=>{
+ const btn=e.target.closest('[data-debt-agreement],[data-debt-shipment]');if(!btn)return;
+ const sh=btn.dataset.debtShipment?shipmentById(btn.dataset.debtShipment):null;
+ const aid=sh?.agreementId||btn.dataset.debtAgreement||'';const a=agreementById(aid);
+ movementView.year='';movementView.month='';movementView.project=a?.project||'';movementView.agreementId=aid;movementView.shipmentId=sh?.id||'';movementView.type='income';movementView.category='';movementView.search='';movementView.sortKey='date';movementView.sortDir='desc';
+ saveMovementView();$('[data-tab=\"movement\"]').click();renderMovement();window.scrollTo({top:0,behavior:'smooth'});
+}));
+
+function renderDashboard(){renderDashboardFilters();const f=dashboardSelection(),ops=filteredOps(),baseOps=filteredOps({ignorePeriod:true}),fin=financialMetrics(ops),global={...totals(),current:selectionCashBalance(f)},timeline=dashboardTimeline(baseOps,f);const ctx=[];if(f.month)ctx.push(monthLabel(f.month));else if(f.year)ctx.push(f.year+' год');else ctx.push('Все годы');if(f.project)ctx.push(f.project);if(f.agreement){const a=agreementById(f.agreement);if(a)ctx.push(a.contract)}if(f.shipment){const sh=shipmentById(f.shipment);if(sh)ctx.push(sh.name)}setText('#dashContextLabel',ctx.join(' · '));$$('.dash-view').forEach(x=>x.classList.toggle('active',x.dataset.dashPanel===activeDashboardView));$$('.dash-mode-btn').forEach(x=>x.classList.toggle('active',x.dataset.dashView===activeDashboardView));renderOwner(ops,baseOps,timeline,fin,global);renderProfit(ops,baseOps,timeline,fin);renderCash(ops,baseOps,timeline,fin,global);renderPayroll(ops,baseOps,timeline,fin);renderTaxes(ops,baseOps,timeline,fin);const detailOps=filteredOps({expand:true}),detailBaseOps=filteredOps({ignorePeriod:true,expand:true});renderProjectsView(detailOps,detailBaseOps,financialMetrics(detailOps));renderContractsView(detailOps,detailBaseOps,financialMetrics(detailOps));renderShipmentsView(detailOps,detailBaseOps,financialMetrics(detailOps));renderReceivables();}
 ['dashYear','dashMonth','dashProject','dashAgreement','dashShipment'].forEach(id=>$('#'+id).addEventListener('change',()=>{if(id==='dashYear'){$('#dashMonth').value='';renderDashboardFilters()}if(id==='dashProject'){$('#dashAgreement').value='';$('#dashShipment').value='';renderDashboardFilters()}if(id==='dashAgreement'){$('#dashShipment').value='';const a=agreementById($('#dashAgreement').value);if(a)$('#dashProject').value=a.project;renderDashboardFilters()}if(id==='dashShipment'){const sh=shipmentById($('#dashShipment').value),a=agreementById(sh?.agreementId);if(sh){$('#dashAgreement').value=sh.agreementId;if(a)$('#dashProject').value=a.project;renderDashboardFilters();$('#dashShipment').value=sh.id}}renderDashboard()}));$('#resetDashFilters').addEventListener('click',()=>{$('#dashYear').value='';$('#dashMonth').value='';$('#dashProject').value='';$('#dashAgreement').value='';$('#dashShipment').value='';renderDashboard()});
 $('#dashModeSwitch').addEventListener('click',e=>{const b=e.target.closest('[data-dash-view]');if(!b)return;activeDashboardView=b.dataset.dashView;renderDashboard();});
 $('#headcountGrid').addEventListener('input',e=>{const el=e.target.closest('[data-hc-month]');if(!el)return;const k=el.dataset.hcMonth,v=Math.max(0,Math.round(Number(el.value)||0));if(v)state.headcountByMonth[k]=v;else delete state.headcountByMonth[k];scheduleSave();});$('#headcountGrid').addEventListener('change',()=>renderDashboard());
