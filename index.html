@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="theme-color" content="#f4f4f6">
-<title>MoneyFlow v18.0 — Движение денег и долги</title>
+<title>MoneyFlow v18.7.1 — авансы по налогу на прибыль · ОСНО</title>
 <style>
 :root{
   --bg:#f4f4f6;--card:#fff;--text:#111114;--muted:#73737b;--line:#e3e3e8;--soft:#f8f8fa;
@@ -282,6 +282,159 @@ body.resizing-col{user-select:none;-webkit-user-select:none;cursor:col-resize}
 @media(max-width:550px){.debt-grid{grid-template-columns:1fr}.debt-kpi{padding:12px}}
 @media(prefers-color-scheme:dark){.dash-mode-switch{background:#1b1d22;border-color:#323641;box-shadow:none}.dash-mode-btn{color:#adb3c0}.dash-mode-btn.active{background:#edf0f5;color:#11131a}.debt-status.overdue{color:#f07c73}.debt-status.upcoming{color:#82a9ff}.debt-status.paid{color:#55c690}}
 
+
+/* v18.2 — кварталы и самостоятельный налоговый прогноз ООО на ОСНО */
+.period-quarter-select:disabled{opacity:.55}
+.movement-filter-grid{grid-template-columns:105px 128px 115px minmax(160px,1fr) minmax(180px,1.1fr) minmax(180px,1.1fr) 110px minmax(175px,1fr) minmax(210px,1.1fr)}
+.taxp-shell{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:22px;margin-bottom:14px}
+.taxp-head{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-bottom:16px}
+.taxp-eyebrow{font-size:10px;letter-spacing:.12em;font-weight:800;text-transform:uppercase;color:var(--muted)}
+.taxp-title{font-size:26px;font-weight:820;letter-spacing:-.03em;margin:5px 0}
+.taxp-sub{color:var(--muted);font-size:12px;max-width:920px;line-height:1.55}
+.taxp-controls{display:flex;gap:8px;align-items:end;flex-wrap:wrap}
+.taxp-controls label,.taxp-field label{font-size:10px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.035em;display:block;margin-bottom:6px}
+.taxp-controls select,.taxp-field input,.taxp-field select{height:41px;border:1px solid var(--line);background:var(--soft);color:var(--text);border-radius:10px;padding:0 11px;font-size:14px;max-width:100%;font-family:inherit;outline:0}
+.taxp-controls select:focus,.taxp-field input:focus,.taxp-field select:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(37,99,235,.12)}
+.taxp-controls select{min-width:120px}
+.taxp-kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin:14px 0}
+.taxp-kpi{background:var(--soft);padding:16px;border:1px solid var(--line);border-radius:14px;min-width:0}
+.taxp-kpi span{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;font-weight:850}
+.taxp-kpi strong{font-size:23px;letter-spacing:-.03em;display:block;margin:11px 0 6px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.taxp-kpi small{font-size:10px;color:var(--muted);line-height:1.35;display:block}
+.taxp-kpi.primary{background:#111827;color:#fff;border-color:#111827}.taxp-kpi.primary span,.taxp-kpi.primary small{color:#a9b6cc}
+.taxp-sections{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.taxp-section{background:var(--soft);border:1px solid var(--line);border-radius:14px;padding:17px;min-width:0}
+.taxp-section h3{margin:0 0 6px;font-size:16px}.taxp-section p{font-size:11px;color:var(--muted);line-height:1.5;margin:0 0 15px}
+.taxp-fields{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.taxp-field{min-width:0}.taxp-field input,.taxp-field select{width:100%}
+.taxp-field small{display:block;margin-top:6px;font-size:10px;color:var(--muted);line-height:1.3}
+.taxp-breakdown{display:grid;grid-template-columns:1fr auto;gap:7px 14px;font-size:12px;line-height:1.4;margin-top:14px;padding-top:13px;border-top:1px solid var(--line)}
+.taxp-breakdown b{text-align:right}.taxp-breakdown .total{font-weight:850;font-size:13px}
+.taxp-note{background:var(--soft);border:1px solid var(--line);border-radius:12px;color:var(--muted);padding:12px 15px;line-height:1.55;font-size:11px;margin:12px 0}
+.taxp-note strong{color:var(--text)}
+.taxp-readonly{border:1px solid var(--line);background:var(--card);border-radius:10px;padding:13px;font-size:12px}
+.taxp-table{width:100%;min-width:760px;border-collapse:collapse}
+.taxp-table th,.taxp-table td{position:static;background:transparent;padding:10px 13px;height:auto;font-size:12px;border-bottom:1px solid var(--line)}
+.taxp-table th{font-size:10px;text-transform:uppercase;color:var(--muted)}
+.taxp-table td.r,.taxp-table th.r{text-align:right}
+.taxp-table tr.selected td{background:rgba(37,99,235,.07)}
+.taxp-table tbody tr{cursor:pointer}.taxp-table tbody tr:hover td{background:rgba(37,99,235,.05)}
+.taxp-charts{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}
+@media(max-width:1350px){.movement-filter-grid{grid-template-columns:repeat(5,minmax(140px,1fr))}}
+@media(max-width:900px){.taxp-kpis{grid-template-columns:repeat(2,1fr)}.taxp-sections,.taxp-charts{grid-template-columns:1fr}.movement-filter-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:600px){.taxp-shell{padding:13px}.taxp-fields{grid-template-columns:1fr}}
+@media(prefers-color-scheme:dark){.taxp-kpi.primary{background:#17243b;border-color:#3b4b68}.taxp-kpi.primary span,.taxp-kpi.primary small{color:#adbed7}.taxp-table tr.selected td{background:rgba(59,130,246,.16)}.taxp-table tbody tr:hover td{background:rgba(59,130,246,.10)}}
+
+/* v18.3 · automatic historical tax-payment projection */
+.taxp-auto-mark{border:1px solid var(--line);background:var(--soft);padding:11px 13px;border-radius:12px;font-weight:750;color:var(--green);white-space:nowrap;font-size:12px}
+.taxp-kpi.primary strong{color:white}
+.taxp-charts .chart-host-v12{min-height:265px}
+.taxp-table td{font-variant-numeric:tabular-nums}
+@media(prefers-color-scheme:dark){.taxp-auto-mark{background:#19231f;color:#6ee7a9;border-color:#274337}.taxp-kpi.primary strong{color:#e8f3ff}}
+
+
+/* v18.4 — квартальный план НДС и налога на прибыль */
+.taxp-quarter-switch{display:flex;gap:9px;flex-wrap:wrap;margin:3px 0 13px}
+.taxp-quarter-switch button{min-height:40px;border-radius:11px;font-size:13px;padding:0 20px}
+.taxp-quarter-switch button.active{background:var(--text);color:var(--card);box-shadow:none}
+.taxp-plan-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.taxp-section-top{display:flex;align-items:baseline;justify-content:space-between;gap:10px}
+.taxp-muted-mark{font-size:10px;color:var(--muted);font-weight:650;white-space:nowrap}
+.taxp-plan-actions{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:11px 0 2px}
+.taxp-plan-actions button{min-height:38px;font-size:12px}
+.taxp-plan-status{color:var(--muted);font-size:11px;margin-left:auto}
+.taxp-table tbody tr{cursor:pointer}
+.taxp-field input::placeholder{color:var(--muted);opacity:.73}
+.taxp-section .taxp-breakdown .total b{font-weight:850}
+@media(max-width:960px){.taxp-plan-grid{grid-template-columns:1fr}}
+@media(max-width:700px){.taxp-plan-status{width:100%;margin-left:0}.taxp-quarter-switch button{flex:1;padding:0 8px}}
+@media(prefers-color-scheme:dark){.taxp-section{background:var(--soft)}.taxp-field input,.taxp-field select{background:#191d24;border-color:#373d49;color:#f4f4f5}.taxp-plan-actions button{background:#262a32;color:#f4f4f5;box-shadow:inset 0 0 0 1px #383f4a}}
+
+/* v18.5 — tax advances */
+.taxadv-block{margin:16px 0;border:1px solid var(--line);background:var(--soft);border-radius:16px;padding:17px}
+.taxadv-heading{display:flex;justify-content:space-between;align-items:start;gap:14px;margin-bottom:12px}
+.taxadv-heading h3{margin:0 0 5px;font-size:18px;letter-spacing:-.01em}
+.taxadv-heading p{margin:0;color:var(--muted);font-size:11px;line-height:1.5;max-width:930px}
+.taxadv-badge{border:1px solid var(--line);background:var(--card);border-radius:99px;padding:7px 12px;white-space:nowrap;font-size:11px;font-weight:800;color:var(--text)}
+.taxadv-badge.warning{color:#b45309;border-color:rgba(180,83,9,.35);background:rgba(180,83,9,.08)}
+.taxadv-badge.monthly{color:#15803d;border-color:rgba(21,128,61,.3);background:rgba(21,128,61,.08)}
+.taxadv-cards{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:9px}
+.taxadv-card{border:1px solid var(--line);border-radius:13px;background:var(--card);padding:13px;min-width:0}
+.taxadv-card span{display:block;font-weight:800;text-transform:uppercase;font-size:9px;color:var(--muted);letter-spacing:.045em}
+.taxadv-card strong{display:block;font-size:21px;line-height:1.1;letter-spacing:-.025em;margin:10px 0 7px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.taxadv-card small{display:block;color:var(--muted);font-size:10px;line-height:1.4}
+.taxadv-explain{margin:12px 0!important;background:var(--card)!important}
+.taxadv-two{display:grid;grid-template-columns:1fr 1.2fr;gap:10px}
+.taxadv-two .chart-card-v12,.taxadv-block>.chart-card-v12{background:var(--card)}
+.taxadv-block .taxp-table td{height:42px}
+@media(max-width:1050px){.taxadv-cards{grid-template-columns:repeat(2,1fr)}.taxadv-two{grid-template-columns:1fr}}
+@media(max-width:660px){.taxadv-cards{grid-template-columns:1fr}.taxadv-heading{flex-direction:column}}
+
+/* v18.6: practical tax scenario and export VAT */
+.taxp-simple-steps{display:flex;gap:8px;flex-wrap:wrap;margin:6px 0 14px}
+.taxp-simple-steps span{display:inline-flex;align-items:center;gap:7px;padding:8px 12px;border:1px solid var(--line);border-radius:10px;color:var(--text);background:var(--soft);font-weight:740;font-size:12px}
+.taxp-simple-steps b{background:var(--text);color:var(--card);display:grid;place-items:center;width:20px;height:20px;border-radius:6px;font-size:11px}
+.taxp-note-short{margin-top:0}
+.taxp-export-input{grid-column:1/-1;padding:12px;border:1px solid rgba(37,99,235,.27);border-radius:11px;background:rgba(37,99,235,.045)}
+.taxp-export-input small{max-width:680px}
+.taxp-simple-results{display:flex;justify-content:space-between;gap:12px;align-items:center;margin-top:16px;font-weight:820;font-size:17px}
+.taxp-simple-results span{font-weight:500;font-size:11px;color:var(--muted)}
+.taxp-kpis{grid-template-columns:repeat(5,minmax(0,1fr))}
+.taxp-kpi.taxp-refund{border-color:rgba(37,99,235,.23)}.taxp-kpi.taxp-refund strong{color:var(--blue)}
+.taxp-advanced{margin:14px 0}.taxp-advanced>summary{list-style:none;display:flex;align-items:center;justify-content:space-between;gap:10px;cursor:pointer;padding:14px 17px;border-radius:13px;border:1px solid var(--line);background:var(--soft)}
+.taxp-advanced>summary::-webkit-details-marker{display:none}.taxp-advanced>summary span:first-child{display:flex;flex-direction:column;gap:4px}.taxp-advanced>summary b{font-size:13px}.taxp-advanced>summary small{font-size:11px;color:var(--muted)}
+.taxp-advanced-action{font-size:11px;font-weight:750;white-space:nowrap;color:var(--blue)}.taxp-advanced[open] .taxp-advanced-action{font-size:0}.taxp-advanced[open] .taxp-advanced-action:after{content:'Свернуть';font-size:11px}
+.taxp-advanced .taxadv-block{margin:10px 0 0}
+@media(max-width:1400px){.taxp-kpis{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media(max-width:850px){.taxp-kpis{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:600px){.taxp-simple-results{display:block}.taxp-advanced>summary{align-items:flex-start;flex-wrap:wrap}.taxp-kpis{grid-template-columns:1fr}.taxp-export-input{grid-column:auto}}
+@media(prefers-color-scheme:dark){.taxp-export-input{background:rgba(59,130,246,.075);border-color:rgba(96,165,250,.33)}.taxp-kpi.taxp-refund{border-color:#334763}.taxp-simple-steps b{background:#eceef1;color:#16181d}}
+
+/* v18.7: ENS without mixing tax expense and internal cash transfers */
+.metrics{grid-template-columns:repeat(4,minmax(0,1fr))}
+.ens-balance-card{border-color:#b4a1ed!important;background:rgba(124,80,213,.055)!important}
+.ens-balance-card .value{color:#8053ca}
+.ens-balance-card small{display:block;font-size:10px;margin-top:5px;color:var(--muted)}
+.ens-opening-controls{display:flex;align-items:center;gap:14px;margin-top:9px;padding:9px 10px;background:var(--soft);border:1px solid var(--line);border-radius:12px;color:var(--muted);font-size:11px}
+.ens-opening-controls label{color:var(--text);font-weight:700;display:flex;align-items:center;gap:8px;white-space:nowrap}
+.ens-opening-controls input{width:160px;min-height:34px;border:1px solid var(--line);background:var(--card);color:var(--text);border-radius:8px;padding:0 9px;font-size:13px;font-weight:700}
+.taxadv-manual{display:flex;gap:12px;align-items:center;background:var(--soft);border:1px solid var(--line);padding:11px 14px;border-radius:12px;margin:10px 0;font-size:11px;color:var(--muted)}.taxadv-manual label{display:flex;flex-direction:column;gap:5px;color:var(--text);font-weight:750;min-width:235px}.taxadv-manual input{width:100%;background:var(--card);border:1px solid var(--line);color:var(--text);border-radius:8px;height:37px;padding:0 10px}.ens-tax-summary{margin:10px 0;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.ens-tax-summary>div{background:var(--card);padding:12px;border:1px solid var(--line);border-radius:13px;display:flex;flex-direction:column;gap:7px}
+.ens-tax-summary span{color:var(--muted);font-size:11px}.ens-tax-summary strong{font-size:20px;letter-spacing:-.025em}
+.ens-transfer-row td{box-shadow:inset 0 0 0 9999px rgba(125,85,210,.045)}
+.ens-transfer-row .category{color:#8752d4;font-weight:750}
+.tax-source{display:flex;gap:5px;align-items:center;margin-top:4px;font-size:9px;color:var(--muted);font-weight:800}
+.tax-source select{max-width:120px;height:25px;font-size:11px;border:1px solid var(--line);border-radius:6px;background:var(--soft);color:var(--text);padding:1px 5px}
+@media(prefers-color-scheme:dark){.ens-balance-card{border-color:#594777!important;background:rgba(122,86,193,.13)!important}.ens-balance-card .value{color:#c8a8ff}.ens-transfer-row td{box-shadow:inset 0 0 0 9999px rgba(130,94,210,.07)}.ens-transfer-row .category{color:#d8baff}}
+@media(max-width:850px){.metrics{grid-template-columns:repeat(2,minmax(0,1fr))}.ens-tax-summary{grid-template-columns:1fr}.ens-opening-controls{flex-wrap:wrap}}
+
+/* v18.7.1 — quick jump to first/last row in a long table */
+.quick-table-nav[hidden]{display:none!important}
+.quick-table-nav{
+  position:fixed;right:calc(17px + env(safe-area-inset-right));bottom:calc(24px + env(safe-area-inset-bottom));
+  z-index:65;display:flex;align-items:center;gap:6px;padding:7px 8px;
+  border:1px solid var(--line);border-radius:16px;background:var(--card);
+  box-shadow:0 12px 35px rgba(0,0,0,.19);
+}
+.quick-table-nav .quick-table-caption{font-size:11px;font-weight:750;color:var(--muted);padding:0 8px 0 3px;white-space:nowrap}
+.quick-table-nav .quick-table-btn{
+  width:44px;height:44px;min-height:44px;padding:0;border-radius:12px;
+  border:1px solid var(--line);background:var(--soft);color:var(--text);
+  box-shadow:none;font-size:24px;font-weight:650;line-height:1;touch-action:manipulation;
+}
+.quick-table-nav .quick-table-btn:hover:not(:disabled){background:var(--line)}
+.quick-table-nav .quick-table-btn:focus-visible{outline:2px solid var(--blue);outline-offset:2px}
+.quick-table-nav .quick-table-btn:disabled{opacity:.33;cursor:default}
+@media(max-width:650px){
+  .quick-table-nav{right:calc(9px + env(safe-area-inset-right));bottom:calc(12px + env(safe-area-inset-bottom));padding:6px}
+  .quick-table-nav .quick-table-caption{display:none}
+  .quick-table-nav .quick-table-btn{width:46px;height:46px}
+}
+@media(prefers-color-scheme:dark){
+ .quick-table-nav{background:#222327;border-color:#3a3a40;box-shadow:0 12px 36px rgba(0,0,0,.46)}
+ .quick-table-nav .quick-table-btn{background:#303137;border-color:#44464c;color:#f5f5f7}
+ .quick-table-nav .quick-table-btn:hover:not(:disabled){background:#41424a}
+}
 </style>
 </head>
 <body>
@@ -300,18 +453,20 @@ body.resizing-col{user-select:none;-webkit-user-select:none;cursor:col-resize}
     <div class="metrics">
       <div class="metric"><div class="label">Начальный остаток</div><div class="budget-input"><input id="startBudget" class="money-input" type="text" inputmode="decimal" autocomplete="off" placeholder="0"><span class="cur">₽</span></div></div>
       <div class="metric"><div class="label">На счетах · доступно</div><div class="value" id="currentBudget">0 ₽</div></div>
-      <div class="metric deposit-metric" id="depositMetric" title="Переводы на вклад минус возвраты с вклада"><div class="label">◆ На вкладах</div><div class="value" id="depositBalance">0 ₽</div></div>
-      <div class="metric"><div class="label">Всего денег</div><div class="value" id="allMoney">0 ₽</div></div>
+      <div class="metric deposit-metric" id="depositMetric" title="Размещение на вклад минус возвраты с вклада"><div class="label">◆ На вкладах</div><div class="value" id="depositBalance">0 ₽</div></div>
+      <div class="metric ens-balance-card"><div class="label">◆ На ЕНС · учётный остаток</div><div class="value" id="ensBalance">0 ₽</div><small id="ensBalanceHint">Пополнения − учтённые зачёты</small></div><div class="metric"><div class="label">Всего денег · включая ЕНС</div><div class="value" id="allMoney">0 ₽</div></div>
       <div class="metric income"><div class="label">Приход</div><div class="value" id="income">0 ₽</div></div>
       <div class="metric expense"><div class="label">Расход</div><div class="value" id="expense">0 ₽</div></div>
       <div class="metric net" id="netBox"><div class="label">Чистый поток</div><div class="value" id="net">0 ₽</div></div>
     </div>
+    <div class="ens-opening-controls"><label>Начальное сальдо ЕНС <input id="ensOpeningBalance" inputmode="decimal" type="text" autocomplete="off" placeholder="0"></label><span>Если на ЕНС уже есть деньги до начала учёта, укажи их здесь. Это отдельный актив, а не прибыль и не дополнительное пополнение банка.</span></div>
   </section>
 
   <nav class="tabs" aria-label="Разделы">
     <button class="tabbtn active" data-tab="movement">Движение</button>
     <button class="tabbtn" data-tab="contracts">Проекты / договоры / поставки</button>
     <button class="tabbtn" data-tab="dashboard">Дашборд</button>
+    <button class="tabbtn" data-tab="taxplanner">План налогов · ОСНО</button>
     <button class="tabbtn" data-tab="ocr">OCR 1С</button>
   </nav>
 
@@ -325,6 +480,7 @@ body.resizing-col{user-select:none;-webkit-user-select:none;cursor:col-resize}
         <div class="movement-filter-head"><strong>Фильтр движений <span id="movementFilterBadge"></span></strong><span id="movementFilterMeta">Все операции</span></div>
         <div class="movement-filter-grid">
           <div class="movement-filter"><label>Год</label><select id="movementYear" class="period-year-select"></select></div>
+          <div class="movement-filter"><label>Квартал</label><select id="movementQuarter" class="period-quarter-select"></select></div>
           <div class="movement-filter"><label>Месяц</label><select id="movementMonth" class="period-month-select"></select></div>
           <div class="movement-filter"><label>Проект</label><select id="movementProject"></select></div>
           <div class="movement-filter"><label>Договор</label><select id="movementAgreement"></select></div>
@@ -395,6 +551,7 @@ body.resizing-col{user-select:none;-webkit-user-select:none;cursor:col-resize}
           <div class="exec-context" id="dashContextLabel">Все данные</div>
           <div class="exec-filterbar">
             <div class="filter"><label>Год</label><select id="dashYear" class="period-year-select"></select></div>
+            <div class="filter"><label>Квартал</label><select id="dashQuarter" class="period-quarter-select"></select></div>
             <div class="filter"><label>Месяц</label><select id="dashMonth" class="period-month-select"></select></div>
             <div class="filter"><label>Проект</label><select id="dashProject"></select></div>
             <div class="filter"><label>Договор</label><select id="dashAgreement"></select></div>
@@ -666,6 +823,86 @@ body.resizing-col{user-select:none;-webkit-user-select:none;cursor:col-resize}
     </div>
   </section>
 
+
+  <section class="tabpage" id="tab-taxplanner">
+    <div class="taxp-shell">
+      <div class="taxp-head">
+        <div>
+          <div class="taxp-eyebrow">ПЛАНИРОВАНИЕ · ООО НА ОСНО</div>
+          <div class="taxp-title">План налогов · просто и понятно</div>
+          <div class="taxp-sub">Три шага: укажи продажи, себестоимость и расходы. Сразу увидишь НДС к уплате или возможному возмещению и налог на прибыль. Сложные расчёты авансов доступны отдельно ниже.</div>
+        </div>
+        <div class="taxp-controls">
+          <label>Год<select id="taxPlanYear" aria-label="Год налогового плана"></select></label>
+          <label>Авансы по прибыли · режим<select id="taxAdvanceMode" aria-label="Режим авансов по налогу на прибыль"><option value="auto">Автоматически по порогу</option><option value="quarterly">Квартальные · по данным бухгалтера</option><option value="monthly">Ежемесячные · по данным бухгалтера</option></select></label>
+          <span class="taxp-auto-mark">Прогноз · ДДС не меняется</span>
+        </div>
+      </div>
+      <div class="taxp-quarter-switch" id="taxPlanQuarters" aria-label="Выбор квартала"></div>
+      <div class="taxp-simple-steps"><span><b>1</b> Продажи в РФ и экспорт</span><span><b>2</b> Закупки и расходы</span><span><b>3</b> Результат по налогам</span></div><div class="taxp-note taxp-note-short"><strong>Заполняй суммы с НДС, где он есть.</strong> Экспорт указывай отдельно по ставке 0%. Входящий НДС по закупкам можно принять к вычету при выполнении условий; без подтверждения экспортной ставки итог может отличаться.</div>
+      <div class="taxp-plan-grid">
+        <div class="taxp-section">
+          <div class="taxp-section-top"><h3>1 · Продажи и экспорт</h3><span class="taxp-muted-mark">План на квартал</span></div>
+          <div class="taxp-fields">
+            <div class="taxp-field"><label id="taxPlanSalesBaseLabel">Отгрузки с основным НДС</label><input data-tax-field="salesBaseGross" inputmode="decimal" autocomplete="off" placeholder="Например, 5 000 000"><small>Сумма с НДС по основной ставке</small></div>
+            <div class="taxp-field"><label>Основная ставка НДС</label><select data-tax-rate="baseRate"><option value="22">22%</option><option value="20">20%</option><option value="10">10%</option><option value="0">0%</option></select><small>Обычно 22% для 2026+; можно изменить</small></div>
+            <div class="taxp-field"><label>Отгрузки с НДС 10%</label><input data-tax-field="salesReducedGross" inputmode="decimal" autocomplete="off" placeholder="0"><small>Если есть отдельная реализация по ставке 10%</small></div>
+            <div class="taxp-field"><label>Экспорт · ставка 0%</label><input data-tax-field="salesZeroGross" inputmode="decimal" autocomplete="off" placeholder="0"><small>Увеличивает выручку, но исходящий НДС по этой реализации = 0 ₽; нулевая ставка требует подтверждения.</small></div>
+          </div>
+          <div class="taxp-breakdown"><span>Вся реализация без НДС, включая экспорт</span><b id="taxPlanRevenueNet">—</b><span>Исходящий НДС с продаж в РФ</span><b id="taxPlanOutputVat">—</b><span>Экспорт со ставкой 0% · для справки</span><b id="taxPlanExportSales">—</b></div>
+        </div>
+        <div class="taxp-section">
+          <div class="taxp-section-top"><h3>2 · Себестоимость и расходы</h3><span class="taxp-muted-mark">План на квартал</span></div>
+          <div class="taxp-fields">
+            <div class="taxp-field"><label>Себестоимость с основным НДС</label><input data-tax-field="costsBaseGross" inputmode="decimal" autocomplete="off" placeholder="Например, 2 500 000"><small>Материалы, подрядчики и услуги по реализованному</small></div>
+            <div class="taxp-field"><label>Основная ставка входящего НДС</label><select data-tax-rate="costRate"><option value="22">22%</option><option value="20">20%</option><option value="10">10%</option><option value="0">0%</option></select><small>Только если входящий НДС можно принять к вычету</small></div>
+            <div class="taxp-field"><label>Себестоимость с НДС 10%</label><input data-tax-field="costsReducedGross" inputmode="decimal" autocomplete="off" placeholder="0"><small>По отдельным закупкам со ставкой 10%</small></div>
+            <div class="taxp-field"><label>Прочие расходы без входящего НДС</label><input data-tax-field="otherExpenses" inputmode="decimal" autocomplete="off" placeholder="ФОТ, аренда без НДС и т. п."><small>Зарплата и другие налогово признаваемые расходы</small></div><div class="taxp-field taxp-export-input"><label>Дополнительный входящий НДС по экспорту</label><input data-tax-field="exportInputVat" inputmode="decimal" autocomplete="off" placeholder="0"><small>Только вычет, НЕ включённый в суммы закупок выше. Не дублируй один НДС дважды; право и период вычета нужно подтвердить.</small></div>
+          </div>
+          <div class="taxp-breakdown"><span>План расходов без НДС</span><b id="taxPlanCostsNet">—</b><span>Входящий НДС из основных закупок</span><b id="taxPlanInputVatBase">—</b><span>Дополнительный вычет по экспорту</span><b id="taxPlanInputVatExport">—</b><span>Весь потенциальный входящий НДС</span><b id="taxPlanInputVat">—</b></div>
+        </div>
+      </div>
+      <div class="taxp-plan-actions">
+        <button id="taxPlanFromShipments" type="button">Подставить поставки (по умолчанию — РФ)</button>
+        <button id="taxPlanCopyPrevious" type="button">Копировать предыдущий квартал</button>
+        <span id="taxPlanSaveLabel" class="taxp-plan-status">Данные сохраняются вместе с MoneyFlow</span>
+      </div>
+      <div class="taxp-simple-results">3 · Прогноз налогов на квартал <span>Суммы для планирования, не декларация</span></div><div class="taxp-kpis" id="taxPlanKpis">
+        <div class="taxp-kpi primary"><span>НДС к уплате · ориентир</span><strong id="taxPlanVatDue">—</strong><small id="taxPlanVatNote">Исходящий НДС минус допустимые вычеты</small></div><div class="taxp-kpi taxp-refund"><span>НДС к возмещению · потенциально</span><strong id="taxPlanVatRefund">—</strong><small>Когда вычеты превышают исходящий НДС; решение ФНС и период вычета отдельно</small></div>
+        <div class="taxp-kpi"><span>Прибыль до налога · квартал</span><strong id="taxPlanProfit">—</strong><small>Расчёт по плановой отгрузке и признаваемым расходам</small></div>
+        <div class="taxp-kpi"><span>Налог на прибыль · начислено за квартал</span><strong id="taxPlanProfitTax">—</strong><small id="taxPlanProfitTaxNote">25% нарастающим итогом · авансы отдельно ниже</small></div>
+        <div class="taxp-kpi"><span>Плановый налоговый отток</span><strong id="taxPlanReserve">—</strong><small>НДС к уплате + ежемесячные авансы + квартальная доплата. Это прогноз перечислений, не сумма налога сверх начисленного.</small></div>
+      </div>
+      <div class="taxp-note" id="taxPlanGuidance">Заполни квартал для расчёта.</div>
+      <div class="ens-tax-summary"><div><span>Расчётный остаток на ЕНС сейчас</span><strong id="taxEnsBalance">—</strong></div><div><span>Плановые налоговые платежи за квартал</span><strong id="taxPlannedPayments">—</strong></div><div><span>Ориентир: сколько ещё перечислить на ЕНС</span><strong id="taxEnsNeed">—</strong></div></div>
+      <div class="taxp-note">Уплата <b>«Авансовый платеж на ЕНС»</b> в ДДС уменьшает банковские деньги и увеличивает остаток ЕНС, но сама по себе не уменьшает прибыль. Когда ФНС зачла НДС или налог на прибыль, добавь налоговую операцию и укажи источник <b>«С ЕНС»</b>. Программа уменьшит ЕНС без второго списания из банка. Остаток расчётный: другие обязательства, очередность зачётов и фактическое сальдо ФНС автоматически не известны.</div>
+      <details class="taxp-advanced"><summary><span><b>Дополнительно: лимит выручки и ежемесячные авансы</b><small>Открывай, когда нужно рассчитать авансовые платежи по прибыли и календарь</small></span><span class="taxp-advanced-action">Показать подробности</span></summary><div class="taxadv-block">
+        <div class="taxadv-heading"><div><h3>Контроль лимита и авансовых платежей</h3><p>Порог по правилам 2026 года: средняя выручка от реализации за 4 предыдущих квартала — 15 млн ₽. Для оценки используются планы реализации <b>без НДС</b>, а не поступления по банку.</p></div><span id="taxAdvanceStatus" class="taxadv-badge">—</span></div>
+        <div class="taxadv-cards">
+          <div class="taxadv-card"><span>Реализация · 4 предыдущих квартала</span><strong id="taxAdvanceTurnover">—</strong><small id="taxAdvanceTurnoverNote">Порог 60 млн ₽ за 4 квартала</small></div>
+          <div class="taxadv-card"><span>Режим на выбранный квартал</span><strong id="taxAdvanceRegime">—</strong><small id="taxAdvanceRegimeNote">—</small></div>
+          <div class="taxadv-card"><span>Ежемесячный аванс</span><strong id="taxAdvanceMonthly">—</strong><small>Как правило, одна треть расчётного аванса на квартал</small></div>
+          <div class="taxadv-card"><span>Доплата по итогам квартала</span><strong id="taxAdvanceTopup">—</strong><small id="taxAdvanceTopupNote">Нарастающий налог минус рассчитанные авансы</small></div>
+        </div>
+        <div class="taxadv-manual"><label>Ежемесячный аванс по декларации (необязательно) <input type="text" inputmode="decimal" autocomplete="off" data-tax-field="monthlyAdvanceOverride" placeholder="Если сумму сообщил бухгалтер"></label><span>Это сумма <b>одного</b> ежемесячного платежа. Используй, если план прошлых кварталов неполный. Приоритет над автоматическим расчётом; не вводи сумму за весь квартал.</span></div>
+        <div class="taxp-note taxadv-explain" id="taxAdvanceExplanation">Чтобы определить режим автоматически, заполни реализацию за четыре предыдущих квартала.</div>
+        <div class="taxadv-two">
+          <div class="chart-card-v12"><div class="chart-head-v12"><div><div class="chart-title-v12">Четыре квартала для проверки лимита</div><div class="chart-sub-v12">Данные до начала выбранного квартала</div></div></div><div class="monthly-table-wrap"><table class="taxp-table"><thead><tr><th>Период</th><th class="r">Реализация без НДС</th><th>Данные</th></tr></thead><tbody id="taxAdvanceHistoryRows"></tbody></table></div></div>
+          <div class="chart-card-v12"><div class="chart-head-v12"><div><div class="chart-title-v12">Авансы по кварталам года</div><div class="chart-sub-v12">Платежи внутри квартала и доплаты по его итогам</div></div></div><div class="chart-host-v12" id="taxAdvanceChart"></div></div>
+        </div>
+        <div class="chart-card-v12" style="margin-top:12px"><div class="chart-head-v12"><div><div class="chart-title-v12">Платёжный календарь · налог на прибыль</div><div class="chart-sub-v12">Расчётные даты 28-го числа (перенос выходных и праздников не учитывается). Итоговые доплаты за IV квартал — в марте следующего года.</div></div><span id="taxAdvanceCalendarMeta" class="chart-meta-v12">—</span></div><div class="monthly-table-wrap"><table class="taxp-table"><thead><tr><th>Плановая дата</th><th>Вид платежа</th><th>Налоговый квартал</th><th class="r">Сумма к резервированию</th><th>Основание / статус</th></tr></thead><tbody id="taxAdvanceCalendarRows"></tbody></table></div></div>
+      </div>
+      </details>
+      <div class="taxp-charts">
+        <div class="chart-card-v12"><div class="chart-head-v12"><div><div class="chart-title-v12">Налоговый план по кварталам</div><div class="chart-sub-v12">НДС и налог на прибыль · оценки, не платежи из банка</div></div></div><div class="chart-host-v12" id="taxPlanTaxChart"></div></div>
+        <div class="chart-card-v12"><div class="chart-head-v12"><div><div class="chart-title-v12">Реализация и признаваемые затраты</div><div class="chart-sub-v12">Суммы без НДС · экономическая основа для оценки</div></div></div><div class="chart-host-v12" id="taxPlanEconomicsChart"></div></div>
+      </div>
+      <div class="chart-card-v12" style="margin-top:12px"><div class="chart-head-v12"><div><div class="chart-title-v12">План на год · четыре квартала</div><div class="chart-sub-v12">Незаполненные кварталы остаются пустыми. Налог на прибыль нарастающим итогом требует заполнения предыдущих кварталов.</div></div><div class="chart-meta-v12" id="taxPlanYearMeta">—</div></div>
+        <div class="monthly-table-wrap"><table class="taxp-table"><thead><tr><th>Квартал</th><th class="r">Реализация без НДС</th><th class="r">Затраты без НДС</th><th class="r">НДС к уплате</th><th class="r">Прибыль до налога</th><th class="r">Налог на прибыль</th><th class="r">Плановый налоговый отток</th></tr></thead><tbody id="taxPlanRows"></tbody></table></div>
+      </div>
+      <div class="taxp-note"><strong>Ограничения прогноза:</strong> для выручки в проверке порога используются указанные тобой планы, а не официальный налоговый регистр. При отсутствии четырёх кварталов режим автоматически установить нельзя; выбранный вручную режим важнее оценки по порогу. Авансы не учитывают переход на ежемесячную уплату по фактической прибыли, спецусловия новых организаций, корректировки налоговой базы, перенос убытков и зачёт подтверждённых переплат. Даты 28-го числа условные — перенос выходных и праздников не включён. НДС с авансов, переносы вычетов и налоговые разницы также не рассчитываются. Экспорт 0% должен быть подтверждён; для сырьевого экспорта возможны специальные сроки вычетов. При планировании на будущие годы проверяй действующий лимит и ставки. Это планирование, <strong>не расчёт обязательств ФНС</strong>; банковские операции и другие дашборды остаются неизменными. <a href="https://www.nalog.gov.ru/rn77/taxation/taxes/profitul/" target="_blank" rel="noopener noreferrer">Правила ФНС</a>.</div>
+    </div>
+  </section>
   <section class="tabpage" id="tab-ocr">
     <div class="ocr">
       <div class="ocr-head">
@@ -685,6 +922,13 @@ body.resizing-col{user-select:none;-webkit-user-select:none;cursor:col-resize}
     </div>
   </section>
 </main>
+
+<div class="quick-table-nav" id="quickTableNav" role="group" aria-label="Быстрая прокрутка таблицы" hidden>
+ <span class="quick-table-caption" id="quickTableCaption">Движение</span>
+ <button class="quick-table-btn" id="quickTableTop" type="button" aria-label="К началу таблицы" title="К первой строке">↑</button>
+ <button class="quick-table-btn" id="quickTableBottom" type="button" aria-label="К концу таблицы" title="К последней строке">↓</button>
+</div>
+
 <div class="toast" id="toast"></div>
 
 <div id="allocationModal" class="alloc-modal" hidden role="dialog" aria-modal="true" aria-labelledby="allocationTitle">
@@ -704,10 +948,10 @@ body.resizing-col{user-select:none;-webkit-user-select:none;cursor:col-resize}
 (() => {
 'use strict';
 const STORAGE_KEY='pnl-ipad-v2';
-const VERSION='18.0', INITIAL_ROWS=100, INITIAL_AGREEMENTS=40, INITIAL_SHIPMENTS=60;
+const VERSION='18.7', INITIAL_ROWS=100, INITIAL_AGREEMENTS=40, INITIAL_SHIPMENTS=60;
 const TYPES=[['','—'],['income','Приход'],['expense','Расход']];
-const INCOME_CATEGORIES=['Выручка','Авансы / предоплаты','Возвраты','Вклад','Прочее'];
-const EXPENSE_CATEGORIES=['Бух. сопровождение','Выдача под отчет','Зарплата сотрудников','Лаб. сопровождение','Офис','Почтовые, курьерские услуги','Сервисы','НДС','НДФЛ','Налог на прибыль','Налоги','Штрафы','Пени','Подрядчики','Материалы / закупки','Аренда','Маркетплейсы','Логистика','Оборудование','Комиссии банка','Дивиденды','Вклад','Прочее'];
+const INCOME_CATEGORIES=['Выручка','Авансы / предоплаты','Возвраты','Вклад','Возврат с ЕНС','Прочее'];
+const EXPENSE_CATEGORIES=['Бух. сопровождение','Выдача под отчет','Зарплата сотрудников','Лаб. сопровождение','Офис','Почтовые, курьерские услуги','Сервисы','НДС','НДФЛ','Налог на прибыль','Налоги','Штрафы','Пени','Подрядчики','Материалы / закупки','Аренда','Маркетплейсы','Логистика','Оборудование','Комиссии банка','Дивиденды','Вклад','Авансовый платеж на ЕНС','Прочее'];
 const TAX_CATEGORY='Налоги';
 const TAX_ALIASES=['налоги','уплата налога','уплата налогов','ндс','ндфл','налог на прибыль'];
 const TAX_DETAIL_CATEGORIES=['НДС','НДФЛ','Налог на прибыль','Налоги / прочие'];
@@ -807,10 +1051,10 @@ function dayDiff(a,b){const da=isoDateObj(a),db=isoDateObj(b);return da&&db?Math
 function paymentTermLabel(v){return PAYMENT_TERMS.find(x=>x[0]===v)?.[1]||'—'}
 function shipmentPaymentInfo(x,paid=0){const plan=Number(x?.amount)||0,remaining=plan>0?Math.max(0,plan-(Number(paid)||0)):0,due=expectedPaymentDate(x);if(plan<=0)return{due,remaining:0,status:'Сумма не задана',kind:'none',days:null};if(remaining<=0)return{due,remaining:0,status:'Оплачено',kind:'paid',days:null};if(!due)return{due:'',remaining,status:'Срок не задан',kind:'none',days:null};const days=dayDiff(todayISO(),due);if(days<0)return{due,remaining,status:`Просрочено ${Math.abs(days)} дн.`,kind:'overdue',days};if(days===0)return{due,remaining,status:'Оплата сегодня',kind:'today',days};return{due,remaining,status:`Через ${days} дн.`,kind:'upcoming',days}}
 
-let state={version:VERSION,startBudget:0,rowCount:INITIAL_ROWS,agreementRowCount:INITIAL_AGREEMENTS,shipmentRowCount:INITIAL_SHIPMENTS,operations:[],agreements:[],shipments:[],headcountByMonth:{},updatedAt:null};
+let state={version:VERSION,startBudget:0,rowCount:INITIAL_ROWS,agreementRowCount:INITIAL_AGREEMENTS,shipmentRowCount:INITIAL_SHIPMENTS,operations:[],agreements:[],shipments:[],headcountByMonth:{},taxForecast:{},quarterTaxPlans:{},taxAdvanceMode:"auto",ensOpeningBalance:0,updatedAt:null};
 let saveTimer=null,activeTab='movement';
 const MOVEMENT_VIEW_KEY='moneyflow-movement-view-v16';
-const DEFAULT_MOVEMENT_VIEW={year:'',month:'',project:'',agreementId:'',shipmentId:'',type:'',category:'',search:'',sortKey:'',sortDir:'asc'};
+const DEFAULT_MOVEMENT_VIEW={year:'',quarter:'',month:'',project:'',agreementId:'',shipmentId:'',type:'',category:'',search:'',sortKey:'',sortDir:'asc'};
 function loadMovementView(){try{const raw=JSON.parse(localStorage.getItem(MOVEMENT_VIEW_KEY)||'{}')||{};const out={...DEFAULT_MOVEMENT_VIEW,...raw};if(/^\d{4}-\d{2}$/.test(out.month||'')&&!out.year)out.year=out.month.slice(0,4);return out}catch(e){return{...DEFAULT_MOVEMENT_VIEW}}}
 function saveMovementView(){try{localStorage.setItem(MOVEMENT_VIEW_KEY,JSON.stringify(movementView))}catch(e){}}
 let movementView=loadMovementView();
@@ -850,14 +1094,21 @@ function operationMatchesHierarchy(o,project='',agreementId='',shipmentId=''){
  return allocatedParts(o).some(part=>(!project||resolvedProject(part)===project)&&(!agreementId||resolvedAgreementId(part)===agreementId)&&(!shipmentId||part.shipmentId===shipmentId));
 }
 function movementVisibleParts(o){return allocatedParts(o).filter(part=>(!movementView.project||resolvedProject(part)===movementView.project)&&(!movementView.agreementId||resolvedAgreementId(part)===movementView.agreementId)&&(!movementView.shipmentId||part.shipmentId===movementView.shipmentId));}
-function signed(o){return (isDepositOp(o)||isArchiveTransfer(o))?0:(o.legacyTaxNonbank ? -Math.abs(Number(o.amount)||0) : cashSigned(o));}
+function signed(o){return (isDepositOp(o)||isArchiveTransfer(o)||isEnsTransfer(o))?0:((o.legacyTaxNonbank||isEnsPaidTax(o))?-Math.abs(Number(o.amount)||0):cashSigned(o));}
 function options(list,current){return list.map(([v,l])=>`<option value="${escapeHtml(v)}" ${v===current?'selected':''}>${escapeHtml(l)}</option>`).join('');}
 function categoryOptions(current='',type=''){let vals=[...new Set(type==='income'?INCOME_CATEGORIES:type==='expense'?EXPENSE_CATEGORIES:[...INCOME_CATEGORIES,...EXPENSE_CATEGORIES])];if(current&&!vals.includes(current))vals=[current,...vals];return `<option value="">—</option>`+vals.map(v=>`<option value="${escapeHtml(v)}" ${v===current?'selected':''}>${escapeHtml(v)}</option>`).join('');}
 function normCat(v){return String(v||'').trim().toLowerCase();}
 function isDepositOp(o){return !!o&&(o.type==='income'||o.type==='expense')&&normCat(o.category)==='вклад';}
 function isDividendOp(o){return o?.type==='expense'&&normCat(o.category)==='дивиденды';}
+function isEnsTransfer(o){return o&&(o.type==='expense'&&o.category==='Авансовый платеж на ЕНС'||o.type==='income'&&o.category==='Возврат с ЕНС');}
+function isEnsPaidTax(o){return isTaxOp(o)&&o.taxSource==='ens';}
+function ensFlow(ops=state.operations.filter(isOpFilled),end=''){
+ let paid=0,returned=0,offset=0;
+ for(const o of ops){if(end&&o.date&&o.date>end)continue;const n=Math.abs(Number(o.amount)||0);if(isEnsTransfer(o)){if(o.type==='expense')paid+=n;else returned+=n;}if(isEnsPaidTax(o))offset+=n;}
+ return {paid,returned,offset,balance:(Number(state.ensOpeningBalance)||0)+paid-returned-offset};
+}
 function taxDetailName(o){const c=normCat(o?.category);return c==='ндс'?'НДС':c==='ндфл'?'НДФЛ':c==='налог на прибыль'?'Налог на прибыль':'Налоги / прочие';}
-function cashSigned(o){if(o.legacyTaxNonbank)return 0;const a=Math.abs(Number(o.amount)||0);return o.type==='expense'?-a:o.type==='income'?a:0;}
+function cashSigned(o){if(o.legacyTaxNonbank||isEnsPaidTax(o))return 0;const a=Math.abs(Number(o.amount)||0);return o.type==='expense'?-a:o.type==='income'?a:0;}
 function isArchiveTransfer(o){return !!o?.legacyInternalTransfer;}
 function depositFlow(ops){let placed=0,returned=0;ops.forEach(o=>{if(!isDepositOp(o))return;const amount=Math.abs(Number(o.amount)||0);if(o.type==='expense')placed+=amount;else returned+=amount;});return {placed,returned,balance:placed-returned};}
 function isTaxOp(o){return o?.type==='expense'&&TAX_ALIASES.includes(normCat(o.category));}
@@ -868,6 +1119,21 @@ function financialMetrics(ops=state.operations.filter(isOpFilled)){
  return{revenue:t.income,expense:businessExpense,cashExpense:t.expense,cashNet:t.net,dividends,taxes,payroll,directCosts,otherOpex,opex,contributionProfit,preTax,netProfit,contributionMargin,preTaxMargin,netMargin,taxBurden,payrollRatio,payrollExpenseShare,costRatio,effectiveCashTaxRate};
 }
 
+function normalizeTaxForecast(raw){const out={};if(!raw||typeof raw!=="object")return out;for(const [key,r] of Object.entries(raw)){if(!/^\d{4}-Q[1-4]$/.test(key)||!r||typeof r!=="object")continue;const row={};for(const f of ["salesGross","outputVatOverride","inputVat","vatAdjust","otherIncome","recognizedExpenses","profitAdjust","profitAdvancesYtd"]){const v=r[f];row[f]=v===""||v==null?"":(Number.isFinite(Number(v))?Number(v):"");}if([0,10,20,22].includes(Number(r.vatRate)))row.vatRate=Number(r.vatRate);out[key]=row;}return out;}
+function normalizeQuarterTaxPlans(raw){
+ const out={};if(!raw||typeof raw!=='object')return out;
+ const fields=['salesBaseGross','salesReducedGross','salesZeroGross','exportInputVat','costsBaseGross','costsReducedGross','otherExpenses','monthlyAdvanceOverride'];
+ for(const [key,value] of Object.entries(raw)){
+  if(!/^\d{4}-Q[1-4]$/.test(key)||!value||typeof value!=='object')continue;
+  const row={};fields.forEach(f=>{const v=value[f];row[f]=v===''||v==null?'':(Number.isFinite(Number(v))?Math.max(0,Number(v)):'')});
+  for(const f of ['baseRate','costRate'])if([0,10,20,22].includes(Number(value[f])))row[f]=Number(value[f]);
+  out[key]=row;
+ }
+ return out;
+}
+function ensureTaxForecast(stateRef){if(!stateRef.taxForecast||typeof stateRef.taxForecast!=="object")stateRef.taxForecast={};}
+function quarterOfDate(date){const m=Number(String(date||"").slice(5,7));return m>=1&&m<=12?String(Math.ceil(m/3)):"";}
+function lastDayOfQuarter(y,q){return `${y}-${String(q*3).padStart(2,"0")}-${new Date(Number(y),Number(q)*3,0).getDate()}`;}
 function normalize(raw){
   const s=raw&&typeof raw==='object'?raw:{};
   const agreements=Array.isArray(s.agreements)?s.agreements.map(a=>({
@@ -888,11 +1154,11 @@ function normalize(raw){
     // Списанный ранее с аванса налог остаётся налоговым расходом, без второго дебета банка.
     const normalizedCategory=legacyInternalTransfer?'Внутренний перевод (архив)':category;
     const hasData=!!(project||agreementId||shipmentId||type||normalizedCategory||info||Number(amount));
-    return{id:o.id||uid(),date:String(o.date||(!hasData?todayISO():'')),autoDate:o.autoDate===true||(!hasData&&!o.date),project,agreementId,shipmentId,type,category:normalizedCategory,amount,info,legacyInternalTransfer,legacyTaxNonbank,
+    return{id:o.id||uid(),date:String(o.date||(!hasData?todayISO():'')),taxSource:o.taxSource==='ens'?'ens':'bank',autoDate:o.autoDate===true||(!hasData&&!o.date),project,agreementId,shipmentId,type,category:normalizedCategory,amount,info,legacyInternalTransfer,legacyTaxNonbank,
       allocations:Array.isArray(o.allocations)?o.allocations.map(r=>({shipmentId:String(r.shipmentId||''),amount:Math.round(Number(r.amount||0)*100)/100})).filter(r=>r.shipmentId&&Number.isFinite(r.amount)&&r.amount>0):[]};
   });
   const hcRaw=s.headcountByMonth&&typeof s.headcountByMonth==='object'?s.headcountByMonth:{};const headcountByMonth={};Object.entries(hcRaw).forEach(([k,v])=>{if(/^\d{4}-\d{2}$/.test(k)&&Number(v)>=0)headcountByMonth[k]=Math.max(0,Math.round(Number(v)||0));});
-  return{version:VERSION,startBudget:Number(s.startBudget)||0,rowCount:Math.max(INITIAL_ROWS,Number(s.rowCount)||0,operations.length),agreementRowCount:Math.max(INITIAL_AGREEMENTS,Number(s.agreementRowCount)||0,agreements.length),shipmentRowCount:Math.max(INITIAL_SHIPMENTS,Number(s.shipmentRowCount)||0,shipments.length),operations,agreements,shipments,headcountByMonth,updatedAt:s.updatedAt||null};
+  return{version:VERSION,startBudget:Number(s.startBudget)||0,rowCount:Math.max(INITIAL_ROWS,Number(s.rowCount)||0,operations.length),agreementRowCount:Math.max(INITIAL_AGREEMENTS,Number(s.agreementRowCount)||0,agreements.length),shipmentRowCount:Math.max(INITIAL_SHIPMENTS,Number(s.shipmentRowCount)||0,shipments.length),operations,agreements,shipments,headcountByMonth,taxForecast:normalizeTaxForecast(s.taxForecast),quarterTaxPlans:normalizeQuarterTaxPlans(s.quarterTaxPlans),taxAdvanceMode:["auto","quarterly","monthly"].includes(s.taxAdvanceMode)?s.taxAdvanceMode:"auto",ensOpeningBalance:Math.max(0,Number(s.ensOpeningBalance)||0),updatedAt:s.updatedAt||null};
 }
 function ensureRows(){
   const today=todayISO();
@@ -916,7 +1182,7 @@ function load(){
     }
     state=normalize(data);
   }}catch(e){console.warn(e)}
-  ensureRows();$('#startBudget').value=formatMoneyInputValue(state.startBudget,true);renderAll();updateSaveText(state.updatedAt?'Сохранено локально':'Автосохранение включено');
+  ensureRows();$('#startBudget').value=formatMoneyInputValue(state.startBudget,true);$('#ensOpeningBalance').value=formatMoneyInputValue(state.ensOpeningBalance);renderAll();updateSaveText(state.updatedAt?'Сохранено локально':'Автосохранение включено');
 }
 function scheduleSave(){clearTimeout(saveTimer);updateSaveText('Сохраняю…');saveTimer=setTimeout(()=>{state.updatedAt=nowISO();try{localStorage.setItem(STORAGE_KEY,JSON.stringify(state));updateSaveText('Сохранено '+new Date().toLocaleTimeString('ru-RU',{hour:'2-digit',minute:'2-digit'}));}catch(e){updateSaveText('Не удалось сохранить');toast('Ошибка автосохранения')}},180)}
 function updateSaveText(t){$('#saveState').textContent=t;}
@@ -930,29 +1196,31 @@ function initResizableTables(){const saved=readColumnWidths();document.querySele
 
 function totals(ops=state.operations.filter(isOpFilled)){
  let income=0,expense=0;ops.forEach(o=>{const v=signed(o);if(v>0)income+=v;if(v<0)expense+=Math.abs(v)});
- const d=depositFlow(ops),net=income-expense,cashNet=ops.reduce((sum,o)=>sum+cashSigned(o),0);
- return{income,expense,net,cashNet,current:(Number(state.startBudget)||0)+cashNet,onDeposit:d.balance,totalMoney:(Number(state.startBudget)||0)+cashNet+d.balance,depositPlaced:d.placed,depositReturned:d.returned};
+ const d=depositFlow(ops),e=ensFlow(ops),net=income-expense,cashNet=ops.reduce((sum,o)=>sum+cashSigned(o),0);
+ return{income,expense,net,cashNet,current:(Number(state.startBudget)||0)+cashNet,onDeposit:d.balance,onEns:e.balance,totalMoney:(Number(state.startBudget)||0)+cashNet+d.balance+e.balance,depositPlaced:d.placed,depositReturned:d.returned};
 }
-function renderSummary(){const t=totals();$('#income').textContent=money(t.income);$('#expense').textContent=money(t.expense);$('#net').textContent=money(t.net);$('#currentBudget').textContent=money(t.current);$('#depositBalance').textContent=money(t.onDeposit);$('#allMoney').textContent=money(t.totalMoney);$('#netBox').classList.toggle('pos',t.net>0);$('#netBox').classList.toggle('neg',t.net<0);$('#depositMetric').classList.toggle('negative-deposit',t.onDeposit<0);}
+function renderSummary(){const t=totals();$('#income').textContent=money(t.income);$('#expense').textContent=money(t.expense);$('#net').textContent=money(t.net);$('#currentBudget').textContent=money(t.current);$('#depositBalance').textContent=money(t.onDeposit);$('#ensBalance').textContent=money(t.onEns);$('#ensBalanceHint').textContent=t.onEns<0?'Внимание: учтённых средств недостаточно':'Пополнения − возвраты − зачёты';$('#allMoney').textContent=money(t.totalMoney);$('#netBox').classList.toggle('pos',t.net>0);$('#netBox').classList.toggle('neg',t.net<0);$('#depositMetric').classList.toggle('negative-deposit',t.onDeposit<0);}
 function projectNames(){const set=new Set();state.agreements.forEach(a=>{if(a.project.trim())set.add(a.project.trim())});state.operations.filter(isOpFilled).forEach(o=>{const p=resolvedProject(o).trim();if(p)set.add(p)});return [...set].sort((a,b)=>a.localeCompare(b,'ru'));}
 function projectOptions(current=''){const vals=projectNames();if(current&&!vals.includes(current))vals.unshift(current);return `<option value="">—</option>`+vals.map(v=>`<option value="${escapeHtml(v)}" ${v===current?'selected':''}>${escapeHtml(v)}</option>`).join('');}
 function agreementOptions(currentId='',project=''){const filled=state.agreements.filter(isAgreementFilled).filter(a=>a.contract.trim());let arr=project?filled.filter(a=>a.project===project):filled;const cur=agreementById(currentId);if(cur&&!arr.some(a=>a.id===cur.id))arr=[cur,...arr];return `<option value="">—</option>`+arr.map(a=>{const label=project?(a.contract||'Без номера'):`${a.project||'Без проекта'} — ${a.contract||'Без номера'}`;return `<option value="${a.id}" ${a.id===currentId?'selected':''}>${escapeHtml(label)}</option>`}).join('');}
 function shipmentOptions(currentId='',agreementId='',project=''){let arr=state.shipments.filter(isShipmentFilled).filter(x=>x.name.trim());if(agreementId)arr=arr.filter(x=>x.agreementId===agreementId);else if(project)arr=arr.filter(x=>agreementById(x.agreementId)?.project===project);const cur=shipmentById(currentId);if(cur&&!arr.some(x=>x.id===cur.id))arr=[cur,...arr];return `<option value="">—</option>`+arr.map(x=>{const a=agreementById(x.agreementId);const label=agreementId?x.name:`${a?.contract?a.contract+' — ':''}${x.name}`;return `<option value="${x.id}" ${x.id===currentId?'selected':''}>${escapeHtml(label)}</option>`}).join('');}
 
 function operationBalances(){let running=Number(state.startBudget)||0;return state.operations.map(o=>{running+=cashSigned(o);return running;});}
-function movementRowHtml(o,i,balance,displayNo=i+1){const p=resolvedProject(o),aid=resolvedAgreementId(o);return `<tr data-i="${i}" class="${isDepositOp(o)?'deposit-row':''}"><td class="num">${displayNo}</td><td><input class="cell date" data-f="date" type="date" value="${escapeHtml(o.date)}"></td><td>${o.allocations?.length?`<span class="allocated-label">${[...new Set(allocatedParts(o).map(resolvedProject))].filter(Boolean).join(', ')||'Распределено'}</span>`:`<select class="cell project" data-f="project">${projectOptions(p)}</select>`}</td><td>${o.allocations?.length?`<span class="allocated-label">${[...new Set(allocatedParts(o).map(resolvedContract))].filter(Boolean).join(', ')||'—'}</span>`:`<select class="cell contract" data-f="agreementId">${agreementOptions(aid,p)}</select>`}</td><td>${o.allocations?.length?`<span class="allocated-label">${o.allocations.length} поставки</span>`:`<select class="cell shipment" data-f="shipmentId">${shipmentOptions(o.shipmentId,aid,p)}</select>`}</td><td><button class="allocate-btn ${o.allocations?.length?'has-alloc':''} ${o.allocations?.length&&!allocationValid(o)?'invalid-alloc':''}" data-allocate="${i}" title="Разнести платёж по поставкам">${o.allocations?.length?(allocationValid(o)?'✓ Разнесено':'! Исправить'):'⇄ Разнести'}</button></td><td><select class="cell type" data-f="type">${options(TYPES,o.type)}</select></td><td><select class="cell category" data-f="category">${categoryOptions(o.category,o.type)}</select></td><td><input class="cell amount" data-f="amount" type="text" inputmode="decimal" autocomplete="off" value="${formatMoneyInputValue(o.amount)}" placeholder="0">${o.allocations?.length&&allocationValid(o)&&(movementView.project||movementView.agreementId||movementView.shipmentId)?`<small class="amount-share">В фильтре: ${money(movementVisibleParts(o).reduce((v,p)=>v+Number(p.amount||0),0))}</small>`:''}</td><td><input class="cell info" data-f="info" value="${escapeHtml(o.info)}" placeholder="Контрагент / назначение / примечание"></td><td class="balance ${balance<0?'neg':''}">${money(balance)}</td><td><button class="row-clear" data-clear="${i}" title="Очистить строку">×</button></td></tr>`;}
-function movementFiltersActive(){return !!(movementView.year||movementView.month||movementView.project||movementView.agreementId||movementView.shipmentId||movementView.type||movementView.category||String(movementView.search||'').trim())}
+function movementRowHtml(o,i,balance,displayNo=i+1){const p=resolvedProject(o),aid=resolvedAgreementId(o);return `<tr data-i="${i}" class="${isDepositOp(o)?'deposit-row':isEnsTransfer(o)?'ens-transfer-row':''}"><td class="num">${displayNo}</td><td><input class="cell date" data-f="date" type="date" value="${escapeHtml(o.date)}"></td><td>${o.allocations?.length?`<span class="allocated-label">${[...new Set(allocatedParts(o).map(resolvedProject))].filter(Boolean).join(', ')||'Распределено'}</span>`:`<select class="cell project" data-f="project">${projectOptions(p)}</select>`}</td><td>${o.allocations?.length?`<span class="allocated-label">${[...new Set(allocatedParts(o).map(resolvedContract))].filter(Boolean).join(', ')||'—'}</span>`:`<select class="cell contract" data-f="agreementId">${agreementOptions(aid,p)}</select>`}</td><td>${o.allocations?.length?`<span class="allocated-label">${o.allocations.length} поставки</span>`:`<select class="cell shipment" data-f="shipmentId">${shipmentOptions(o.shipmentId,aid,p)}</select>`}</td><td><button class="allocate-btn ${o.allocations?.length?'has-alloc':''} ${o.allocations?.length&&!allocationValid(o)?'invalid-alloc':''}" data-allocate="${i}" title="Разнести платёж по поставкам">${o.allocations?.length?(allocationValid(o)?'✓ Разнесено':'! Исправить'):'⇄ Разнести'}</button></td><td><select class="cell type" data-f="type">${options(TYPES,o.type)}</select></td><td><select class="cell category" data-f="category">${categoryOptions(o.category,o.type)}</select>${isTaxOp(o)?`<label class="tax-source">Оплата: <select data-f="taxSource"><option value="bank" ${o.taxSource!=='ens'?'selected':''}>С банка</option><option value="ens" ${o.taxSource==='ens'?'selected':''}>С ЕНС</option></select></label>`:''}</td><td><input class="cell amount" data-f="amount" type="text" inputmode="decimal" autocomplete="off" value="${formatMoneyInputValue(o.amount)}" placeholder="0">${o.allocations?.length&&allocationValid(o)&&(movementView.project||movementView.agreementId||movementView.shipmentId)?`<small class="amount-share">В фильтре: ${money(movementVisibleParts(o).reduce((v,p)=>v+Number(p.amount||0),0))}</small>`:''}</td><td><input class="cell info" data-f="info" value="${escapeHtml(o.info)}" placeholder="Контрагент / назначение / примечание"></td><td class="balance ${balance<0?'neg':''}">${money(balance)}</td><td><button class="row-clear" data-clear="${i}" title="Очистить строку">×</button></td></tr>`;}
+function movementFiltersActive(){return !!(movementView.year||movementView.quarter||movementView.month||movementView.project||movementView.agreementId||movementView.shipmentId||movementView.type||movementView.category||String(movementView.search||'').trim())}
 function movementSortActive(){return !!movementView.sortKey}
 function movementText(o){return [o,...allocatedParts(o)].flatMap(x=>[resolvedProject(x),resolvedContract(x),resolvedShipment(x),x.category,x.info,x.type==='income'?'приход':'расход']).join(' ').toLocaleLowerCase('ru-RU')}
 function movementSortValue(entry,key,balances){const o=entry.o;if(key==='date')return o.date||'';if(key==='project')return resolvedProject(o)||'';if(key==='contract')return resolvedContract(o)||'';if(key==='shipment')return resolvedShipment(o)||'';if(key==='type')return o.type==='income'?'Приход':o.type==='expense'?'Расход':'';if(key==='category')return o.category||'';if(key==='amount')return Number(o.amount)||0;if(key==='info')return o.info||'';if(key==='balance')return Number(balances[entry.i])||0;return entry.i}
 function compareMovementEntries(a,b,key,dir,balances){let av=movementSortValue(a,key,balances),bv=movementSortValue(b,key,balances);const emptyA=av===''||av==null,emptyB=bv===''||bv==null;if(emptyA!==emptyB)return emptyA?1:-1;let c=0;if(typeof av==='number'&&typeof bv==='number')c=av-bv;else c=String(av).localeCompare(String(bv),'ru',{numeric:true,sensitivity:'base'});if(!c)c=a.i-b.i;return dir==='desc'?-c:c}
-function movementEntries(balances=operationBalances()){const filters=movementFiltersActive(),q=String(movementView.search||'').trim().toLocaleLowerCase('ru-RU');let entries=state.operations.map((o,i)=>({o,i}));if(filters){entries=entries.filter(({o})=>{if(!isOpFilled(o))return false;if(movementView.year&&String(o.date||'').slice(0,4)!==movementView.year)return false;if(movementView.month&&monthKey(o.date)!==movementView.month)return false;if(!operationMatchesHierarchy(o,movementView.project,movementView.agreementId,movementView.shipmentId))return false;if(movementView.type&&o.type!==movementView.type)return false;if(movementView.category&&o.category!==movementView.category)return false;if(q&&!movementText(o).includes(q))return false;return true})}
+function movementEntries(balances=operationBalances()){const filters=movementFiltersActive(),q=String(movementView.search||'').trim().toLocaleLowerCase('ru-RU');let entries=state.operations.map((o,i)=>({o,i}));if(filters){entries=entries.filter(({o})=>{if(!isOpFilled(o))return false;if(movementView.year&&String(o.date||'').slice(0,4)!==movementView.year)return false;if(movementView.quarter&&quarterOfDate(o.date)!==movementView.quarter)return false;if(movementView.month&&monthKey(o.date)!==movementView.month)return false;if(!operationMatchesHierarchy(o,movementView.project,movementView.agreementId,movementView.shipmentId))return false;if(movementView.type&&o.type!==movementView.type)return false;if(movementView.category&&o.category!==movementView.category)return false;if(q&&!movementText(o).includes(q))return false;return true})}
  if(movementView.sortKey){const filled=entries.filter(x=>isOpFilled(x.o)),blank=filters?[]:entries.filter(x=>!isOpFilled(x.o));filled.sort((a,b)=>compareMovementEntries(a,b,movementView.sortKey,movementView.sortDir,balances));entries=[...filled,...blank]}
  return entries}
 function movementCategoryList(){const base=movementView.type==='income'?[...INCOME_CATEGORIES]:movementView.type==='expense'?[...EXPENSE_CATEGORIES]:[...INCOME_CATEGORIES,...EXPENSE_CATEGORIES];state.operations.filter(isOpFilled).forEach(o=>{if(o.category&&(!movementView.type||o.type===movementView.type))base.push(o.category)});return [...new Set(base.filter(Boolean))].sort((a,b)=>a.localeCompare(b,'ru'))}
-function renderMovementFilters(){const year=$('#movementYear'),month=$('#movementMonth'),project=$('#movementProject'),agreement=$('#movementAgreement'),shipment=$('#movementShipment'),type=$('#movementType'),category=$('#movementCategory'),search=$('#movementSearch'),sort=$('#movementSort');if(!month)return;
+function renderMovementFilters(){const year=$('#movementYear'),quarter=$('#movementQuarter'),month=$('#movementMonth'),project=$('#movementProject'),agreement=$('#movementAgreement'),shipment=$('#movementShipment'),type=$('#movementType'),category=$('#movementCategory'),search=$('#movementSearch'),sort=$('#movementSort');if(!month)return;
  if(year){year.innerHTML=`<option value="">Все годы</option>`+allYears().slice().reverse().map(y=>`<option value="${y}">${y}</option>`).join('');year.value=movementView.year||'';}
- if(movementView.year){month.disabled=false;month.innerHTML=`<option value="">Все месяцы</option>`+monthOptionsForYear(movementView.year,movementView.month);}else{movementView.month='';month.disabled=true;month.innerHTML='<option value="">Сначала выбери год</option>';}month.value=movementView.month||'';
+ if(quarter){quarter.disabled=!movementView.year;quarter.innerHTML='<option value="">Все кварталы</option>'+[1,2,3,4].map(q=>`<option value="${q}">${q} квартал</option>`).join('');quarter.value=movementView.year?(movementView.quarter||''):'';}
+ if(movementView.quarter)movementView.month='';
+ if(movementView.year&&!movementView.quarter){month.disabled=false;month.innerHTML=`<option value="">Все месяцы</option>`+monthOptionsForYear(movementView.year,movementView.month);}else{movementView.month='';month.disabled=true;month.innerHTML='<option value="">Выбран квартал / год</option>';}month.value=movementView.month||'';
  project.innerHTML=`<option value="">Все проекты</option>`+projectNames().map(x=>`<option value="${escapeHtml(x)}">${escapeHtml(x)}</option>`).join('');project.value=movementView.project||'';
  let ags=state.agreements.filter(isAgreementFilled).filter(a=>a.contract&&(!movementView.project||a.project===movementView.project));agreement.innerHTML=`<option value="">Все договоры</option>`+ags.map(a=>`<option value="${a.id}">${escapeHtml(movementView.project?a.contract:`${a.project||'Без проекта'} — ${a.contract}`)}</option>`).join('');if(movementView.agreementId&&!ags.some(a=>a.id===movementView.agreementId))movementView.agreementId='';agreement.value=movementView.agreementId||'';
  let shs=state.shipments.filter(isShipmentFilled).filter(x=>x.name);if(movementView.agreementId)shs=shs.filter(x=>x.agreementId===movementView.agreementId);else if(movementView.project)shs=shs.filter(x=>agreementById(x.agreementId)?.project===movementView.project);shipment.innerHTML=`<option value="">Все поставки</option>`+shs.map(x=>`<option value="${x.id}">${escapeHtml(movementView.agreementId?x.name:shipmentLabel(x))}</option>`).join('');if(movementView.shipmentId&&!shs.some(x=>x.id===movementView.shipmentId))movementView.shipmentId='';shipment.value=movementView.shipmentId||'';
@@ -961,7 +1229,7 @@ function renderMovementFilters(){const year=$('#movementYear'),month=$('#movemen
  const active=movementFiltersActive();$('#movementFilterBadge').innerHTML=active?'<span class="filter-active-badge">Фильтры активны</span>':'';document.querySelectorAll('#movementTable th[data-sort]').forEach(th=>{if(th.dataset.sort===movementView.sortKey)th.dataset.sortState=movementView.sortDir;else th.removeAttribute('data-sort-state')});saveMovementView();}
 function updateMovementFilterSummary(entries){const visible=entries.filter(x=>isOpFilled(x.o)).map(x=>x.o),all=state.operations.filter(isOpFilled),t=totals(visible.flatMap(movementVisibleParts)),active=movementFiltersActive();$('#movementShown').textContent=active?`${visible.length} из ${all.length}`:`${all.length}`;$('#movementIncome').textContent=money(t.income);$('#movementExpense').textContent=money(t.expense);$('#movementNet').textContent=money(t.net);$('#movementDeposit').textContent=(t.onDeposit>=0?'+':'')+money(t.onDeposit);const box=$('#movementNetBox');box.classList.toggle('pos',t.net>0);box.classList.toggle('neg',t.net<0);$('#movementFilterMeta').textContent=active?`По фильтру: ${visible.length} операций`:(movementSortActive()?'Все операции · включена сортировка':'Все операции');$('#countInfo').textContent=active?`${visible.length} из ${all.length} операций`:`${all.length} операций · ${state.rowCount} строк`;}
 function renderMovement(){ensureRows();const balances=operationBalances();renderMovementFilters();const entries=movementEntries(balances);$('#rows').innerHTML=entries.length?entries.map((x,pos)=>movementRowHtml(x.o,x.i,balances[x.i],pos+1)).join(''):`<tr class="movement-empty"><td colspan="12">По выбранным фильтрам операций нет</td></tr>`;updateMovementFilterSummary(entries);initResizableTables();}
-function refreshMovementNumbers(start=0){renderSummary();const b=operationBalances(),trs=$('#rows').querySelectorAll('tr[data-i]');trs.forEach(tr=>{const idx=Number(tr.dataset.i),cell=tr.querySelector('.balance');if(cell){cell.textContent=money(b[idx]);cell.classList.toggle('neg',b[idx]<0)}});updateMovementFilterSummary(movementEntries(b));renderAgreementStats();if(activeTab==='dashboard')renderDashboard();}
+function refreshMovementNumbers(start=0){renderSummary();const b=operationBalances(),trs=$('#rows').querySelectorAll('tr[data-i]');trs.forEach(tr=>{const idx=Number(tr.dataset.i),cell=tr.querySelector('.balance');if(cell){cell.textContent=money(b[idx]);cell.classList.toggle('neg',b[idx]<0)}});updateMovementFilterSummary(movementEntries(b));renderAgreementStats();if(activeTab==='dashboard')renderDashboard();if(activeTab==='taxplanner')renderTaxPlanner();}
 
 function agreementStats(ops=state.operations.filter(isOpFilled)){const map=new Map(),seen=new Map();state.agreements.forEach(a=>{map.set(a.id,{income:0,expense:0,count:0});seen.set(a.id,new Set())});expandAllocatedOps(ops).forEach(o=>{const aid=resolvedAgreementId(o);if(!aid||!map.has(aid))return;const st=map.get(aid),v=signed(o);if(v>0)st.income+=v;if(v<0)st.expense+=Math.abs(v);if(!seen.get(aid).has(o.id)){st.count++;seen.get(aid).add(o.id)}});return map;}
 function shipmentStats(ops=state.operations.filter(isOpFilled)){const map=new Map();state.shipments.forEach(x=>map.set(x.id,{income:0,expense:0,count:0,ops:[]}));expandAllocatedOps(ops).forEach(o=>{if(!o.shipmentId||!map.has(o.shipmentId))return;const st=map.get(o.shipmentId),v=signed(o);if(v>0)st.income+=v;if(v<0)st.expense+=Math.abs(v);st.count++;st.ops.push(o)});return map;}
@@ -972,18 +1240,20 @@ function shipmentRowHtml(x,i,stats){const a=agreementById(x.agreementId),p=a?.pr
 function renderShipmentTable(){ensureRows();const stats=shipmentStats();$('#shipmentRows').innerHTML=state.shipments.map((x,i)=>shipmentRowHtml(x,i,stats.get(x.id)||{income:0,expense:0,count:0,ops:[]})).join('');$('#shipmentCount').textContent=`${state.shipments.filter(isShipmentFilled).length} поставок`;initResizableTables();}
 function renderShipmentStats(){if(!$('#shipmentRows'))return;renderShipmentTable();}
 
-function renderAll(){renderSummary();renderMovement();renderAgreementTable();renderShipmentTable();renderDashboardFilters();renderOcrBulkSelectors();if(activeTab==='dashboard')renderDashboard();}
+function renderAll(){renderSummary();renderMovement();renderAgreementTable();renderShipmentTable();renderDashboardFilters();renderOcrBulkSelectors();if(activeTab==='dashboard')renderDashboard();if(activeTab==='taxplanner')renderTaxPlanner();}
 
 $('#startBudget').addEventListener('input',e=>{const v=formatMoneyInputElement(e.target,true);state.startBudget=v===''?0:v;refreshMovementNumbers(0);scheduleSave()});
+$('#ensOpeningBalance').addEventListener('input',e=>{const v=formatMoneyInputElement(e.target);state.ensOpeningBalance=v===''?0:Math.max(0,Number(v)||0);refreshMovementNumbers(0);scheduleSave()});
 $('#rows').addEventListener('input',handleMovementCell);$('#rows').addEventListener('change',handleMovementCell);
-function handleMovementCell(e){const el=e.target;if(!el.dataset.f)return;const tr=el.closest('tr'),i=Number(tr.dataset.i),o=state.operations[i],f=el.dataset.f;if(f==='amount'){const v=formatMoneyInputElement(el);o.amount=v===''?'':Math.abs(Number(v)||0);} else if(f==='shipmentId'){o.shipmentId=el.value;const sh=shipmentById(o.shipmentId);if(sh){o.agreementId=sh.agreementId;const a=agreementById(sh.agreementId);if(a)o.project=a.project;}const psel=tr.querySelector('[data-f="project"]'),asel=tr.querySelector('[data-f="agreementId"]');if(psel)psel.innerHTML=projectOptions(resolvedProject(o));if(asel)asel.innerHTML=agreementOptions(resolvedAgreementId(o),resolvedProject(o));}else if(f==='agreementId'){o.agreementId=el.value;const a=agreementById(o.agreementId);if(a)o.project=a.project;const sh=shipmentById(o.shipmentId);if(sh&&sh.agreementId!==o.agreementId)o.shipmentId='';const psel=tr.querySelector('[data-f="project"]'),ssel=tr.querySelector('[data-f="shipmentId"]');if(psel)psel.innerHTML=projectOptions(resolvedProject(o));if(ssel)ssel.innerHTML=shipmentOptions(o.shipmentId,o.agreementId,o.project);}else if(f==='project'){o.project=el.value;const a=agreementById(o.agreementId);if(a&&a.project!==o.project){o.agreementId='';o.shipmentId='';}const csel=tr.querySelector('[data-f="agreementId"]'),ssel=tr.querySelector('[data-f="shipmentId"]');if(csel)csel.innerHTML=agreementOptions(o.agreementId,o.project);if(ssel)ssel.innerHTML=shipmentOptions(o.shipmentId,o.agreementId,o.project);}else o[f]=el.value;if(f==='type'){const csel=tr.querySelector('[data-f="category"]');if(csel)csel.innerHTML=categoryOptions(o.category,o.type);}if(f==='date')o.autoDate=false;if(f!=='date'&&isOpFilled(o)&&!o.date){o.date=todayISO();o.autoDate=true;tr.querySelector('[data-f="date"]').value=o.date}refreshMovementNumbers(i);renderShipmentStats();scheduleSave();renderOcrBulkSelectors();if(e.type==='change'&&(movementFiltersActive()||movementSortActive()||o.allocations?.length))renderMovement();}
+function handleMovementCell(e){const el=e.target;if(!el.dataset.f)return;const tr=el.closest('tr'),i=Number(tr.dataset.i),o=state.operations[i],f=el.dataset.f;if(f==='amount'){const v=formatMoneyInputElement(el);o.amount=v===''?'':Math.abs(Number(v)||0);} else if(f==='shipmentId'){o.shipmentId=el.value;const sh=shipmentById(o.shipmentId);if(sh){o.agreementId=sh.agreementId;const a=agreementById(sh.agreementId);if(a)o.project=a.project;}const psel=tr.querySelector('[data-f="project"]'),asel=tr.querySelector('[data-f="agreementId"]');if(psel)psel.innerHTML=projectOptions(resolvedProject(o));if(asel)asel.innerHTML=agreementOptions(resolvedAgreementId(o),resolvedProject(o));}else if(f==='agreementId'){o.agreementId=el.value;const a=agreementById(o.agreementId);if(a)o.project=a.project;const sh=shipmentById(o.shipmentId);if(sh&&sh.agreementId!==o.agreementId)o.shipmentId='';const psel=tr.querySelector('[data-f="project"]'),ssel=tr.querySelector('[data-f="shipmentId"]');if(psel)psel.innerHTML=projectOptions(resolvedProject(o));if(ssel)ssel.innerHTML=shipmentOptions(o.shipmentId,o.agreementId,o.project);}else if(f==='project'){o.project=el.value;const a=agreementById(o.agreementId);if(a&&a.project!==o.project){o.agreementId='';o.shipmentId='';}const csel=tr.querySelector('[data-f="agreementId"]'),ssel=tr.querySelector('[data-f="shipmentId"]');if(csel)csel.innerHTML=agreementOptions(o.agreementId,o.project);if(ssel)ssel.innerHTML=shipmentOptions(o.shipmentId,o.agreementId,o.project);}else o[f]=el.value;if((f==='type'||f==='category')&&!isTaxOp(o))o.taxSource='bank';if(f==='type'){const csel=tr.querySelector('[data-f="category"]');if(csel)csel.innerHTML=categoryOptions(o.category,o.type);}if(f==='date')o.autoDate=false;if(f!=='date'&&isOpFilled(o)&&!o.date){o.date=todayISO();o.autoDate=true;tr.querySelector('[data-f="date"]').value=o.date}refreshMovementNumbers(i);renderShipmentStats();scheduleSave();renderOcrBulkSelectors();if(e.type==='change'&&(f==='category'||f==='type'||f==='taxSource'||movementFiltersActive()||movementSortActive()||o.allocations?.length))renderMovement();}
 $('#rows').addEventListener('click',e=>{const b=e.target.closest('[data-clear]');if(!b)return;const i=Number(b.dataset.clear);state.operations[i]=emptyOp();renderMovement();renderSummary();renderAgreementStats();renderShipmentTable();if(activeTab==='dashboard')renderDashboard();scheduleSave()});
 $('#rows').addEventListener('keydown',e=>{if(e.key!=='Enter')return;const el=e.target.closest('.cell');if(!el)return;e.preventDefault();const tr=el.closest('tr'),cells=[...tr.querySelectorAll('.cell')],col=cells.indexOf(el),next=tr.nextElementSibling;if(next){([...next.querySelectorAll('.cell')][col]||next.querySelector('.cell'))?.focus()}});
 $('#moreRows').addEventListener('click',()=>{state.rowCount+=50;ensureRows();renderMovement();scheduleSave();requestAnimationFrame(()=>$('#tableScroll').scrollTo({top:$('#tableScroll').scrollHeight,behavior:'smooth'}))});
 $('#movementFilters').addEventListener('change',e=>{
   const id=e.target.id;
-  if(id==='movementYear'){movementView.year=e.target.value;movementView.month='';}
-  else if(id==='movementMonth')movementView.month=e.target.value;
+  if(id==='movementYear'){movementView.year=e.target.value;movementView.quarter='';movementView.month='';}
+  else if(id==='movementQuarter'){movementView.quarter=e.target.value;movementView.month='';}
+  else if(id==='movementMonth'){movementView.month=e.target.value;if(movementView.month)movementView.quarter='';}
   else if(id==='movementProject'){movementView.project=e.target.value;movementView.agreementId='';movementView.shipmentId='';}
   else if(id==='movementAgreement'){movementView.agreementId=e.target.value;movementView.shipmentId='';const a=agreementById(movementView.agreementId);if(a)movementView.project=a.project;}
   else if(id==='movementShipment'){movementView.shipmentId=e.target.value;const sh=shipmentById(movementView.shipmentId),a=agreementById(sh?.agreementId);if(sh){movementView.agreementId=sh.agreementId;if(a)movementView.project=a.project;}}
@@ -1036,7 +1306,7 @@ $('#moreAgreements').addEventListener('click',()=>{
   scheduleSave();
 });
 
-$$('.tabbtn').forEach(btn=>btn.addEventListener('click',()=>{activeTab=btn.dataset.tab;document.body.classList.toggle('dashboard-active',activeTab==='dashboard');$$('.tabbtn').forEach(x=>x.classList.toggle('active',x===btn));$$('.tabpage').forEach(x=>x.classList.toggle('active',x.id===`tab-${activeTab}`));if(activeTab==='contracts'){renderAgreementTable();renderShipmentTable();}if(activeTab==='dashboard'){renderDashboardFilters();renderDashboard()}if(activeTab==='ocr')renderOcrBulkSelectors();}));
+$$('.tabbtn').forEach(btn=>btn.addEventListener('click',()=>{activeTab=btn.dataset.tab;if(activeTab==='taxplanner')renderTaxPlanner();document.body.classList.toggle('dashboard-active',activeTab==='dashboard');$$('.tabbtn').forEach(x=>x.classList.toggle('active',x===btn));$$('.tabpage').forEach(x=>x.classList.toggle('active',x.id===`tab-${activeTab}`));if(activeTab==='contracts'){renderAgreementTable();renderShipmentTable();}if(activeTab==='dashboard'){renderDashboardFilters();renderDashboard()}if(activeTab==='ocr')renderOcrBulkSelectors();}));
 
 
 function allMonths(){return [...new Set(state.operations.filter(isOpFilled).map(o=>monthKey(o.date)).filter(Boolean))].sort();}
@@ -1044,10 +1314,10 @@ function allYears(){const current=new Date().getFullYear(),set=new Set();for(let
 function monthNameByNumber(n){const m=Math.max(1,Math.min(12,Number(n)||1));return new Intl.DateTimeFormat('ru-RU',{month:'long'}).format(new Date(2020,m-1,1)).replace(/^./,c=>c.toUpperCase())}
 function monthOptionsForYear(year,current=''){return Array.from({length:12},(_,i)=>{const k=`${year}-${String(i+1).padStart(2,'0')}`;return `<option value="${k}" ${k===current?'selected':''}>${escapeHtml(monthNameByNumber(i+1))}</option>`}).join('')}
 let headcountYear=new Date().getFullYear();
-function renderDashboardFilters(){const y=$('#dashYear'),m=$('#dashMonth'),p=$('#dashProject'),a=$('#dashAgreement'),sh=$('#dashShipment');const yv=y?.value||'',mv=m?.value||'',pv=p?.value||'',av=a?.value||'',sv=sh?.value||'';if(y){y.innerHTML=`<option value="">Все годы</option>`+allYears().slice().reverse().map(v=>`<option value="${v}" ${v===yv?'selected':''}>${v}</option>`).join('');y.value=yv;}const actualY=y?.value||'';if(m){if(actualY){m.disabled=false;m.innerHTML=`<option value="">Весь год</option>`+monthOptionsForYear(actualY,mv);if(mv&&mv.slice(0,4)!==actualY)m.value='';else m.value=mv;}else{m.disabled=true;m.innerHTML='<option value="">Все годы</option>';m.value='';}}if(p)p.innerHTML=`<option value="">Все проекты</option>`+projectNames().map(x=>`<option value="${escapeHtml(x)}" ${x===pv?'selected':''}>${escapeHtml(x)}</option>`).join('');let agreements=[];if(a){agreements=state.agreements.filter(x=>x.contract&&(!pv||x.project===pv));a.innerHTML=`<option value="">Все договоры</option>`+agreements.map(x=>`<option value="${x.id}" ${x.id===av?'selected':''}>${escapeHtml(pv?x.contract:`${x.project} — ${x.contract}`)}</option>`).join('');if(av&&!agreements.some(x=>x.id===av))a.value='';}const actualA=a?.value||'';if(sh){let list=state.shipments.filter(isShipmentFilled).filter(x=>x.name);if(actualA)list=list.filter(x=>x.agreementId===actualA);else if(pv)list=list.filter(x=>agreementById(x.agreementId)?.project===pv);sh.innerHTML=`<option value="">Все поставки</option>`+list.map(x=>`<option value="${x.id}" ${x.id===sv?'selected':''}>${escapeHtml(actualA?x.name:shipmentLabel(x))}</option>`).join('');if(sv&&!list.some(x=>x.id===sv))sh.value='';}}
-function dashboardSelection(){return{year:$('#dashYear')?.value||'',month:$('#dashMonth')?.value||'',project:$('#dashProject')?.value||'',agreement:$('#dashAgreement')?.value||'',shipment:$('#dashShipment')?.value||''};}
-function filteredOps({ignoreMonth=false,ignoreYear=false,ignorePeriod=false,monthOverride=null,yearOverride=null,expand=false}={}){const f=dashboardSelection();let month=monthOverride!==null?monthOverride:f.month,year=yearOverride!==null?String(yearOverride||''):f.year;if(monthOverride!==null&&month)year=month.slice(0,4);if(ignorePeriod){month='';year=''}else{if(ignoreMonth)month='';if(ignoreYear)year='';}const source=state.operations.filter(isOpFilled).filter(o=>(!year||String(o.date||'').slice(0,4)===year)&&(!month||monthKey(o.date)===month));const drill=expand||!!(f.project||f.agreement||f.shipment);const ops=drill?expandAllocatedOps(source):source;return ops.filter(o=>(!f.project||resolvedProject(o)===f.project)&&(!f.agreement||resolvedAgreementId(o)===f.agreement)&&(!f.shipment||o.shipmentId===f.shipment));}
-function dateMatchesDashboardPeriod(date,f=dashboardSelection()){if(!date)return false;const y=String(date).slice(0,4),m=monthKey(date);return (!f.year||y===f.year)&&(!f.month||m===f.month)}
+function renderDashboardFilters(){const y=$('#dashYear'),q=$('#dashQuarter'),m=$('#dashMonth'),p=$('#dashProject'),a=$('#dashAgreement'),sh=$('#dashShipment');const yv=y?.value||'',mv=m?.value||'',pv=p?.value||'',av=a?.value||'',sv=sh?.value||'';if(y){y.innerHTML=`<option value="">Все годы</option>`+allYears().slice().reverse().map(v=>`<option value="${v}" ${v===yv?'selected':''}>${v}</option>`).join('');y.value=yv;}const actualY=y?.value||'';if(q){const qv=q.value||'';q.disabled=!actualY;q.innerHTML='<option value="">Все кварталы</option>'+[1,2,3,4].map(n=>`<option value="${n}">${n} квартал</option>`).join('');q.value=actualY?qv:'';}if(m){if(actualY&&!q?.value){m.disabled=false;m.innerHTML=`<option value="">Весь год</option>`+monthOptionsForYear(actualY,mv);if(mv&&mv.slice(0,4)!==actualY)m.value='';else m.value=mv;}else{m.disabled=true;m.innerHTML='<option value="">Все годы</option>';m.value='';}}if(p)p.innerHTML=`<option value="">Все проекты</option>`+projectNames().map(x=>`<option value="${escapeHtml(x)}" ${x===pv?'selected':''}>${escapeHtml(x)}</option>`).join('');let agreements=[];if(a){agreements=state.agreements.filter(x=>x.contract&&(!pv||x.project===pv));a.innerHTML=`<option value="">Все договоры</option>`+agreements.map(x=>`<option value="${x.id}" ${x.id===av?'selected':''}>${escapeHtml(pv?x.contract:`${x.project} — ${x.contract}`)}</option>`).join('');if(av&&!agreements.some(x=>x.id===av))a.value='';}const actualA=a?.value||'';if(sh){let list=state.shipments.filter(isShipmentFilled).filter(x=>x.name);if(actualA)list=list.filter(x=>x.agreementId===actualA);else if(pv)list=list.filter(x=>agreementById(x.agreementId)?.project===pv);sh.innerHTML=`<option value="">Все поставки</option>`+list.map(x=>`<option value="${x.id}" ${x.id===sv?'selected':''}>${escapeHtml(actualA?x.name:shipmentLabel(x))}</option>`).join('');if(sv&&!list.some(x=>x.id===sv))sh.value='';}}
+function dashboardSelection(){return{year:$('#dashYear')?.value||'',quarter:$('#dashQuarter')?.value||'',month:$('#dashMonth')?.value||'',project:$('#dashProject')?.value||'',agreement:$('#dashAgreement')?.value||'',shipment:$('#dashShipment')?.value||''};}
+function filteredOps({ignoreMonth=false,ignoreYear=false,ignorePeriod=false,monthOverride=null,yearOverride=null,expand=false}={}){const f=dashboardSelection();let month=monthOverride!==null?monthOverride:f.month,year=yearOverride!==null?String(yearOverride||''):f.year;if(monthOverride!==null&&month)year=month.slice(0,4);if(ignorePeriod){month='';year=''}else{if(ignoreMonth)month='';if(ignoreYear)year='';}const source=state.operations.filter(isOpFilled).filter(o=>(!year||String(o.date||'').slice(0,4)===year)&&(!month||monthKey(o.date)===month)&&(!ignorePeriod&&!ignoreYear&&monthOverride===null&&f.quarter?quarterOfDate(o.date)===f.quarter:true));const drill=expand||!!(f.project||f.agreement||f.shipment);const ops=drill?expandAllocatedOps(source):source;return ops.filter(o=>(!f.project||resolvedProject(o)===f.project)&&(!f.agreement||resolvedAgreementId(o)===f.agreement)&&(!f.shipment||o.shipmentId===f.shipment));}
+function dateMatchesDashboardPeriod(date,f=dashboardSelection()){if(!date)return false;const y=String(date).slice(0,4),m=monthKey(date);return (!f.year||y===f.year)&&(!f.month||m===f.month)&&(!f.quarter||quarterOfDate(date)===f.quarter)}
 function previousMonthKey(k){if(!/^\d{4}-\d{2}$/.test(k))return'';const [y,m]=k.split('-').map(Number),d=new Date(y,m-2,1);return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;}
 function formatDateShort(v){if(!/^\d{4}-\d{2}-\d{2}/.test(String(v||'')))return v||'—';const [y,m,d]=v.slice(0,10).split('-').map(Number);return new Intl.DateTimeFormat('ru-RU',{day:'2-digit',month:'short'}).format(new Date(y,m-1,d)).replace('.','');}
 function formatCompact(n){return new Intl.NumberFormat('ru-RU',{notation:'compact',maximumFractionDigits:1}).format(Number(n)||0);}
@@ -1062,9 +1332,9 @@ function setDelta(id,info){const el=$(id);if(!el)return;el.textContent=info.text
 function monthShift(k,delta){if(!/^\d{4}-\d{2}$/.test(k))return'';const [y,m]=k.split('-').map(Number),d=new Date(y,m-1+delta,1);return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;}
 function paddedMonths(ops,count=12,endKey=''){const keys=ops.map(o=>monthKey(o.date)).filter(k=>/^\d{4}-\d{2}$/.test(k)).sort();const end=endKey||keys[keys.length-1]||monthKey(todayISO());const groups=new Map();ops.forEach(o=>{const k=monthKey(o.date);if(!groups.has(k))groups.set(k,[]);groups.get(k).push(o)});const arr=[];for(let i=count-1;i>=0;i--){const k=monthShift(end,-i),list=groups.get(k)||[],t=totals(list),f=financialMetrics(list);arr.push({key:k,...t,...f,headcount:Number(state.headcountByMonth?.[k])||0})}return arr;}
 function annualRows(ops){const groups=new Map();ops.forEach(o=>{const y=String(o.date||'').slice(0,4);if(!/^\d{4}$/.test(y))return;if(!groups.has(y))groups.set(y,[]);groups.get(y).push(o)});const years=[...groups.keys()].sort();if(!years.length)return[];const min=Number(years[0]),max=Number(years.at(-1)),out=[];for(let y=min;y<=max;y++){const key=String(y),list=groups.get(key)||[],t=totals(list),f=financialMetrics(list),hcs=Array.from({length:12},(_,i)=>Number(state.headcountByMonth?.[`${key}-${String(i+1).padStart(2,'0')}`])||0).filter(Boolean),headcount=hcs.length?hcs.reduce((a,b)=>a+b,0)/hcs.length:0;out.push({key,...t,...f,headcount})}return out;}
-function dashboardTimeline(ops,f=dashboardSelection()){if(f.month)return paddedMonths(ops,12,f.month);if(f.year)return paddedMonths(ops,12,`${f.year}-12`);return annualRows(ops);}
+function dashboardTimeline(ops,f=dashboardSelection()){if(f.month)return paddedMonths(ops,12,f.month);if(f.quarter&&f.year)return paddedMonths(ops,3,`${f.year}-${String(Number(f.quarter)*3).padStart(2,'0')}`);if(f.year)return paddedMonths(ops,12,`${f.year}-12`);return annualRows(ops);}
 function balanceSeriesFor(ops,count=12,endKey=''){const f=dashboardSelection(),rows=dashboardTimeline(ops,f),entity=!!(f.project||f.agreement||f.shipment);let run=entity?0:Number(state.startBudget)||0,first=rows[0]?.key||'';if(!entity&&first){const annual=/^\d{4}$/.test(first);state.operations.filter(isOpFilled).forEach(o=>{const k=annual?String(o.date||'').slice(0,4):monthKey(o.date);if(k&&k<first)run+=cashSigned(o)})}return rows.map(x=>({key:x.key,value:(run+=x.cashNet)}));}
-function selectionCashBalance(f=dashboardSelection()){const entity=!!(f.project||f.agreement||f.shipment),end=f.month||f.year||'';let list=state.operations.filter(isOpFilled).filter(o=>(!f.project||resolvedProject(o)===f.project)&&(!f.agreement||resolvedAgreementId(o)===f.agreement)&&(!f.shipment||o.shipmentId===f.shipment));if(end)list=list.filter(o=>{const k=f.month?monthKey(o.date):String(o.date||'').slice(0,4);return k&&k<=end});return(entity?0:Number(state.startBudget)||0)+list.reduce((sum,o)=>sum+cashSigned(o),0);}
+function selectionCashBalance(f=dashboardSelection()){const entity=!!(f.project||f.agreement||f.shipment),end=f.month||(f.quarter&&f.year?`${f.year}-${String(Number(f.quarter)*3).padStart(2,'0')}`:f.year)||'';let list=state.operations.filter(isOpFilled).filter(o=>(!f.project||resolvedProject(o)===f.project)&&(!f.agreement||resolvedAgreementId(o)===f.agreement)&&(!f.shipment||o.shipmentId===f.shipment));if(end)list=list.filter(o=>{const k=(f.month||f.quarter)?monthKey(o.date):String(o.date||'').slice(0,4);return k&&k<=end});return(entity?0:Number(state.startBudget)||0)+list.reduce((sum,o)=>sum+cashSigned(o),0);}
 function monthlyRiskMetrics(baseOps,endKey=''){const f=dashboardSelection(),end=endKey||f.month||(f.year?`${f.year}-12`:'');const rows=paddedMonths(baseOps,12,end),last3=rows.slice(-3),burn=last3.reduce((s,x)=>s+x.expense,0)/3,negative=rows.filter(x=>x.net<0).length;return{rows,burn,negative};}
 function headcountStats(rows){const vals=rows.filter(r=>r.headcount>0).map(r=>r.headcount),avg=vals.length?vals.reduce((a,b)=>a+b,0)/vals.length:0,latest=[...rows].reverse().find(r=>r.headcount>0)?.headcount||0;return{avg,latest,months:vals.length};}
 
@@ -1151,7 +1421,7 @@ function renderShipmentsView(ops,baseOps,fin){const rows=shipmentDashboardRows(o
  const h=$('#shipSummaryRows');setText('#shipTableMeta',rows.length?`${rows.length} поставок`:'—');if(h)h.innerHTML=rows.length?rows.sort((a,b)=>b.ff.revenue+b.ff.expense-(a.ff.revenue+a.ff.expense)).map(r=>{const rem=r.plan>0?r.plan-r.ff.revenue:null,pct=r.plan>0?r.ff.revenue/r.plan*100:null,p=r.payment;return `<tr><td>${escapeHtml(r.a?.project||'—')}</td><td>${escapeHtml(r.a?.contract||'—')}</td><td><strong>${escapeHtml(r.name)}</strong></td><td>${escapeHtml(r.x.date?formatDateShort(r.x.date):'—')}</td><td>${escapeHtml(paymentTermLabel(r.x.paymentTerm))}</td><td>${escapeHtml(p.due?formatDateShort(p.due):'—')}</td><td class="${p.kind==='overdue'?'bad':p.kind==='paid'?'good':''}">${escapeHtml(p.status)}</td><td class="r">${r.plan?money(r.plan):'—'}</td><td class="r good">${r.ff.revenue?money(r.ff.revenue):'—'}</td><td class="r ${rem!=null&&rem<0?'bad':''}">${rem==null?'—':money(rem)}</td><td class="r ${pct!=null&&pct>100?'bad':''}">${fmtPct(pct)}</td><td class="r">${r.ff.directCosts?money(r.ff.directCosts):'—'}</td><td class="r">${r.ff.payroll?money(r.ff.payroll):'—'}</td><td class="r">${r.ff.taxes?money(r.ff.taxes):'—'}</td><td class="r">${r.ff.expense?money(r.ff.expense):'—'}</td><td class="r ${r.ff.netProfit>=0?'good':'bad'}">${r.st.count?(r.ff.netProfit>=0?'+':'')+money(r.ff.netProfit):'—'}</td><td class="r ${r.ff.netMargin!=null&&r.ff.netMargin>=0?'good':'bad'}">${fmtPct(r.ff.netMargin)}</td><td class="r">${r.st.count}</td></tr>`}).join(''):'<tr><td colspan="18" style="text-align:center;color:var(--muted);padding:26px">Нет поставок</td></tr>';
 }
 function receivablesSnapshot(filter=dashboardSelection()){
- const asOf=filter.month?addCalendarDaysISO(filter.month+'-01',new Date(Number(filter.month.slice(0,4)),Number(filter.month.slice(5,7)),0).getDate()-1):filter.year?`${filter.year}-12-31`:todayISO();
+ const asOf=filter.month?addCalendarDaysISO(filter.month+'-01',new Date(Number(filter.month.slice(0,4)),Number(filter.month.slice(5,7)),0).getDate()-1):filter.quarter&&filter.year?lastDayOfQuarter(filter.year,Number(filter.quarter)):filter.year?`${filter.year}-12-31`:todayISO();
  const originalOps=state.operations.filter(isOpFilled).filter(o=>o.type==='income'&&!isDepositOp(o)&&!isArchiveTransfer(o)&&/^\d{4}-\d{2}-\d{2}$/.test(String(o.date||''))&&o.date<=asOf);
  const receiptParts=expandAllocatedOps(originalOps);
  const byAgreement=new Map(),byShipment=new Map();
@@ -1214,8 +1484,8 @@ function renderReceivables(){
  saveMovementView();$('[data-tab=\"movement\"]').click();renderMovement();window.scrollTo({top:0,behavior:'smooth'});
 }));
 
-function renderDashboard(){renderDashboardFilters();const f=dashboardSelection(),ops=filteredOps(),baseOps=filteredOps({ignorePeriod:true}),fin=financialMetrics(ops),global={...totals(),current:selectionCashBalance(f)},timeline=dashboardTimeline(baseOps,f);const ctx=[];if(f.month)ctx.push(monthLabel(f.month));else if(f.year)ctx.push(f.year+' год');else ctx.push('Все годы');if(f.project)ctx.push(f.project);if(f.agreement){const a=agreementById(f.agreement);if(a)ctx.push(a.contract)}if(f.shipment){const sh=shipmentById(f.shipment);if(sh)ctx.push(sh.name)}setText('#dashContextLabel',ctx.join(' · '));$$('.dash-view').forEach(x=>x.classList.toggle('active',x.dataset.dashPanel===activeDashboardView));$$('.dash-mode-btn').forEach(x=>x.classList.toggle('active',x.dataset.dashView===activeDashboardView));renderOwner(ops,baseOps,timeline,fin,global);renderProfit(ops,baseOps,timeline,fin);renderCash(ops,baseOps,timeline,fin,global);renderPayroll(ops,baseOps,timeline,fin);renderTaxes(ops,baseOps,timeline,fin);const detailOps=filteredOps({expand:true}),detailBaseOps=filteredOps({ignorePeriod:true,expand:true});renderProjectsView(detailOps,detailBaseOps,financialMetrics(detailOps));renderContractsView(detailOps,detailBaseOps,financialMetrics(detailOps));renderShipmentsView(detailOps,detailBaseOps,financialMetrics(detailOps));renderReceivables();}
-['dashYear','dashMonth','dashProject','dashAgreement','dashShipment'].forEach(id=>$('#'+id).addEventListener('change',()=>{if(id==='dashYear'){$('#dashMonth').value='';renderDashboardFilters()}if(id==='dashProject'){$('#dashAgreement').value='';$('#dashShipment').value='';renderDashboardFilters()}if(id==='dashAgreement'){$('#dashShipment').value='';const a=agreementById($('#dashAgreement').value);if(a)$('#dashProject').value=a.project;renderDashboardFilters()}if(id==='dashShipment'){const sh=shipmentById($('#dashShipment').value),a=agreementById(sh?.agreementId);if(sh){$('#dashAgreement').value=sh.agreementId;if(a)$('#dashProject').value=a.project;renderDashboardFilters();$('#dashShipment').value=sh.id}}renderDashboard()}));$('#resetDashFilters').addEventListener('click',()=>{$('#dashYear').value='';$('#dashMonth').value='';$('#dashProject').value='';$('#dashAgreement').value='';$('#dashShipment').value='';renderDashboard()});
+function renderDashboard(){renderDashboardFilters();const f=dashboardSelection(),ops=filteredOps(),baseOps=filteredOps({ignorePeriod:true}),fin=financialMetrics(ops),global={...totals(),current:selectionCashBalance(f)},timeline=dashboardTimeline(baseOps,f);const ctx=[];if(f.month)ctx.push(monthLabel(f.month));else if(f.quarter&&f.year)ctx.push(`${f.quarter} квартал ${f.year}`);else if(f.year)ctx.push(f.year+' год');else ctx.push('Все годы');if(f.project)ctx.push(f.project);if(f.agreement){const a=agreementById(f.agreement);if(a)ctx.push(a.contract)}if(f.shipment){const sh=shipmentById(f.shipment);if(sh)ctx.push(sh.name)}setText('#dashContextLabel',ctx.join(' · '));$$('.dash-view').forEach(x=>x.classList.toggle('active',x.dataset.dashPanel===activeDashboardView));$$('.dash-mode-btn').forEach(x=>x.classList.toggle('active',x.dataset.dashView===activeDashboardView));renderOwner(ops,baseOps,timeline,fin,global);renderProfit(ops,baseOps,timeline,fin);renderCash(ops,baseOps,timeline,fin,global);renderPayroll(ops,baseOps,timeline,fin);renderTaxes(ops,baseOps,timeline,fin);const detailOps=filteredOps({expand:true}),detailBaseOps=filteredOps({ignorePeriod:true,expand:true});renderProjectsView(detailOps,detailBaseOps,financialMetrics(detailOps));renderContractsView(detailOps,detailBaseOps,financialMetrics(detailOps));renderShipmentsView(detailOps,detailBaseOps,financialMetrics(detailOps));renderReceivables();}
+['dashYear','dashQuarter','dashMonth','dashProject','dashAgreement','dashShipment'].forEach(id=>$('#'+id).addEventListener('change',()=>{if(id==='dashYear'){$('#dashMonth').value='';$('#dashQuarter').value='';renderDashboardFilters()}if(id==='dashQuarter'){$('#dashMonth').value='';renderDashboardFilters()}if(id==='dashMonth'&&$('#dashMonth').value){$('#dashQuarter').value='';}if(id==='dashProject'){$('#dashAgreement').value='';$('#dashShipment').value='';renderDashboardFilters()}if(id==='dashAgreement'){$('#dashShipment').value='';const a=agreementById($('#dashAgreement').value);if(a)$('#dashProject').value=a.project;renderDashboardFilters()}if(id==='dashShipment'){const sh=shipmentById($('#dashShipment').value),a=agreementById(sh?.agreementId);if(sh){$('#dashAgreement').value=sh.agreementId;if(a)$('#dashProject').value=a.project;renderDashboardFilters();$('#dashShipment').value=sh.id}}renderDashboard()}));$('#resetDashFilters').addEventListener('click',()=>{$('#dashYear').value='';$('#dashQuarter').value='';$('#dashMonth').value='';$('#dashProject').value='';$('#dashAgreement').value='';$('#dashShipment').value='';renderDashboard()});
 $('#dashModeSwitch').addEventListener('click',e=>{const b=e.target.closest('[data-dash-view]');if(!b)return;activeDashboardView=b.dataset.dashView;renderDashboard();});
 $('#headcountGrid').addEventListener('input',e=>{const el=e.target.closest('[data-hc-month]');if(!el)return;const k=el.dataset.hcMonth,v=Math.max(0,Math.round(Number(el.value)||0));if(v)state.headcountByMonth[k]=v;else delete state.headcountByMonth[k];scheduleSave();});$('#headcountGrid').addEventListener('change',()=>renderDashboard());
 $('#headcountPrevYear').addEventListener('click',()=>{headcountYear=Math.max(1900,headcountYear-1);renderHeadcountGrid();});
@@ -1223,11 +1493,11 @@ $('#headcountNextYear').addEventListener('click',()=>{headcountYear=Math.min(220
 $('#headcountCurrentYear').addEventListener('click',()=>{headcountYear=new Date().getFullYear();renderHeadcountGrid();});
 $('#headcountYearSelect').addEventListener('change',e=>{headcountYear=Math.max(1900,Math.min(2200,Number(e.target.value)||new Date().getFullYear()));renderHeadcountGrid();});
 
-function exportState(){return{format:'moneyflow-ipad',version:VERSION,exportedAt:nowISO(),startBudget:state.startBudget,rowCount:state.rowCount,agreementRowCount:state.agreementRowCount,shipmentRowCount:state.shipmentRowCount,headcountByMonth:state.headcountByMonth||{},agreements:state.agreements.filter(isAgreementFilled),shipments:state.shipments.filter(isShipmentFilled),operations:state.operations.filter(isOpFilled).map(o=>({id:o.id,date:o.date,project:o.project,agreementId:resolvedAgreementId(o),shipmentId:o.shipmentId||'',type:o.type,category:o.category,amount:o.amount,info:o.info,allocations:Array.isArray(o.allocations)?o.allocations:[]}))};}
+function exportState(){return{format:'moneyflow-ipad',version:VERSION,exportedAt:nowISO(),startBudget:state.startBudget,rowCount:state.rowCount,agreementRowCount:state.agreementRowCount,shipmentRowCount:state.shipmentRowCount,headcountByMonth:state.headcountByMonth||{},taxForecast:state.taxForecast||{},quarterTaxPlans:state.quarterTaxPlans||{},taxAdvanceMode:state.taxAdvanceMode||"auto",ensOpeningBalance:state.ensOpeningBalance||0,agreements:state.agreements.filter(isAgreementFilled),shipments:state.shipments.filter(isShipmentFilled),operations:state.operations.filter(isOpFilled).map(o=>({id:o.id,date:o.date,project:o.project,agreementId:resolvedAgreementId(o),shipmentId:o.shipmentId||'',type:o.type,category:o.category,amount:o.amount,info:o.info,taxSource:o.taxSource||'bank',allocations:Array.isArray(o.allocations)?o.allocations:[]}))};}
 function downloadBlob(blob,name){const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},1000)}
 $('#exportJson').addEventListener('click',()=>{downloadBlob(new Blob([JSON.stringify(exportState(),null,2)],{type:'application/json;charset=utf-8'}),`MoneyFlow_${todayISO()}.json`);toast('JSON выгружен')});
-$('#jsonInput').addEventListener('change',async e=>{const file=e.target.files?.[0];if(!file)return;try{const data=JSON.parse(await file.text());if(!data||!Array.isArray(data.operations))throw new Error('bad');state=normalize(data);ensureRows();$('#startBudget').value=formatMoneyInputValue(state.startBudget,true);renderAll();scheduleSave();toast('JSON загружен')}catch(err){alert('Не удалось прочитать JSON. Выбери файл, который был выгружен из этого приложения.')}e.target.value=''});
-$('#reset').addEventListener('click',()=>{if(!confirm('Очистить остаток, операции, договоры и поставки? Перед этим можно выгрузить JSON.'))return;state={version:VERSION,startBudget:0,rowCount:INITIAL_ROWS,agreementRowCount:INITIAL_AGREEMENTS,shipmentRowCount:INITIAL_SHIPMENTS,operations:[],agreements:[],shipments:[],headcountByMonth:{},updatedAt:null};ensureRows();$('#startBudget').value='';renderAll();scheduleSave();toast('Данные очищены')});
+$('#jsonInput').addEventListener('change',async e=>{const file=e.target.files?.[0];if(!file)return;try{const data=JSON.parse(await file.text());if(!data||!Array.isArray(data.operations))throw new Error('bad');state=normalize(data);ensureRows();$('#startBudget').value=formatMoneyInputValue(state.startBudget,true);$('#ensOpeningBalance').value=formatMoneyInputValue(state.ensOpeningBalance);renderAll();scheduleSave();toast('JSON загружен')}catch(err){alert('Не удалось прочитать JSON. Выбери файл, который был выгружен из этого приложения.')}e.target.value=''});
+$('#reset').addEventListener('click',()=>{if(!confirm('Очистить остаток, операции, договоры и поставки? Перед этим можно выгрузить JSON.'))return;state={version:VERSION,startBudget:0,rowCount:INITIAL_ROWS,agreementRowCount:INITIAL_AGREEMENTS,shipmentRowCount:INITIAL_SHIPMENTS,operations:[],agreements:[],shipments:[],headcountByMonth:{},taxForecast:{},quarterTaxPlans:{},taxAdvanceMode:"auto",ensOpeningBalance:0,updatedAt:null};ensureRows();$('#startBudget').value='';$('#ensOpeningBalance').value='';renderAll();scheduleSave();toast('Данные очищены')});
 
 function xmlEscape(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&apos;'}[c]));}
 function colName(n){let s='';while(n){n--;s=String.fromCharCode(65+n%26)+s;n=Math.floor(n/26)}return s;}
@@ -1236,19 +1506,20 @@ function crc32(bytes){let crc=-1;for(let i=0;i<bytes.length;i++){crc^=bytes[i];f
 function u16(n){return[n&255,(n>>>8)&255]}function u32(n){return[n&255,(n>>>8)&255,(n>>>16)&255,(n>>>24)&255]}
 function dosDateTime(d=new Date()){const year=Math.max(1980,d.getFullYear()),time=(d.getHours()<<11)|(d.getMinutes()<<5)|(d.getSeconds()>>1),date=((year-1980)<<9)|((d.getMonth()+1)<<5)|d.getDate();return{time,date};}
 function zipStore(files){const enc=new TextEncoder(),locals=[],centrals=[];let offset=0;const stamp=dosDateTime();for(const f of files){const name=enc.encode(f.name),data=typeof f.data==='string'?enc.encode(f.data):f.data,crc=crc32(data);const local=new Uint8Array([0x50,0x4b,0x03,0x04,...u16(20),...u16(0),...u16(0),...u16(stamp.time),...u16(stamp.date),...u32(crc),...u32(data.length),...u32(data.length),...u16(name.length),...u16(0),...name,...data]);locals.push(local);const central=new Uint8Array([0x50,0x4b,0x01,0x02,...u16(20),...u16(20),...u16(0),...u16(0),...u16(stamp.time),...u16(stamp.date),...u32(crc),...u32(data.length),...u32(data.length),...u16(name.length),...u16(0),...u16(0),...u16(0),...u16(0),...u32(0),...u32(offset),...name]);centrals.push(central);offset+=local.length}const centralSize=centrals.reduce((a,b)=>a+b.length,0),end=new Uint8Array([0x50,0x4b,0x05,0x06,...u16(0),...u16(0),...u16(files.length),...u16(files.length),...u32(centralSize),...u32(offset),...u16(0)]);return new Blob([...locals,...centrals,end],{type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'});}
-function buildXlsx(){const filled=state.operations.filter(isOpFilled);let running=Number(state.startBudget)||0;const movements=[['Дата','Проект','Договор','Поставка / отгрузка','Тип','Статья','Сумма','Информация','Баланс']];filled.forEach(o=>{const v=cashSigned(o);running+=v;movements.push([o.date,resolvedProject(o),resolvedContract(o),(o.allocations?.length?`Разнесено: ${o.allocations.length} поставки`:resolvedShipment(o)),o.type==='income'?'Приход':o.type==='expense'?'Расход':'',o.category||'',v,o.info,running])});
+function buildXlsx(){const filled=state.operations.filter(isOpFilled);let running=Number(state.startBudget)||0;const movements=[['Дата','Проект','Договор','Поставка / отгрузка','Тип','Статья','Сумма операции','По банку','Информация','Баланс банка','Источник налога']];filled.forEach(o=>{const v=cashSigned(o);running+=v;movements.push([o.date,resolvedProject(o),resolvedContract(o),(o.allocations?.length?`Разнесено: ${o.allocations.length} поставки`:resolvedShipment(o)),o.type==='income'?'Приход':o.type==='expense'?'Расход':'',o.category||'',signed(o),v,o.info,running,isTaxOp(o)?(o.taxSource==='ens'?'ЕНС':'Банк'):'']);});
  const stats=agreementStats();const contracts=[['Проект','Договор','Дата договора','Сумма договора','Контрагент','Информация','Поставок','Оплачено заказчиком','Затраты','Чистая прибыль','Маржа, %','Осталось получить']];state.agreements.filter(isAgreementFilled).forEach(a=>{const list=expandAllocatedOps(filled).filter(o=>resolvedAgreementId(o)===a.id),st=stats.get(a.id)||{income:0,expense:0},ff=financialMetrics(list),shipCount=state.shipments.filter(x=>isShipmentFilled(x)&&x.agreementId===a.id).length;contracts.push([a.project,a.contract,a.date,Number(a.amount)||0,a.counterparty,a.info,shipCount,st.income,st.expense,ff.netProfit,ff.netMargin==null?'':ff.netMargin,Number(a.amount)>0?Number(a.amount)-st.income:''])});
  const shStats=shipmentStats();const shipments=[['Проект','Договор','Поставка / отгрузка','Дата отгрузки','Срок оплаты','Ожидаемая дата оплаты','Статус оплаты','Сумма поставки','Информация','Оплачено заказчиком','Осталось получить','Оплата, %','Затраты','Прямые затраты','ФОТ','Налоги','Чистая прибыль','Маржа, %','Операций']];state.shipments.filter(isShipmentFilled).forEach(x=>{const a=agreementById(x.agreementId),st=shStats.get(x.id)||{income:0,expense:0,count:0,ops:[]},ff=financialMetrics(st.ops||[]),pi=shipmentPaymentInfo(x,st.income);shipments.push([a?.project||'',a?.contract||'',x.name,x.date,paymentTermLabel(x.paymentTerm),pi.due,pi.status,Number(x.amount)||0,x.info,st.income,Number(x.amount)>0?Number(x.amount)-st.income:'',Number(x.amount)>0?st.income/Number(x.amount)*100:'',st.expense,ff.directCosts,ff.payroll,ff.taxes,ff.netProfit,ff.netMargin==null?'':ff.netMargin,st.count])});
  const monthGroups=new Map();filled.forEach(o=>{const k=monthKey(o.date);if(!k)return;if(!monthGroups.has(k))monthGroups.set(k,[]);monthGroups.get(k).push(o)});const months=[['Месяц','Выручка','Прямые затраты','ФОТ','Прочие операционные расходы','Налоги','Все расходы','Прибыль до налогов','Чистая прибыль','Чистая маржа, %','Численность']];[...monthGroups.keys()].sort().forEach(k=>{const f=financialMetrics(monthGroups.get(k));months.push([k,f.revenue,f.directCosts,f.payroll,f.otherOpex,f.taxes,f.expense,f.preTax,f.netProfit,f.netMargin==null?'':f.netMargin,Number(state.headcountByMonth?.[k])||''])});const yearGroups=new Map();filled.forEach(o=>{const y=String(o.date||'').slice(0,4);if(!/^\d{4}$/.test(y))return;if(!yearGroups.has(y))yearGroups.set(y,[]);yearGroups.get(y).push(o)});const years=[['Год','Выручка','Прямые затраты','ФОТ','Прочие операционные расходы','Налоги','Все расходы','Прибыль до налогов','Чистая прибыль','Чистая маржа, %','Средняя численность']];[...yearGroups.keys()].sort().forEach(y=>{const f=financialMetrics(yearGroups.get(y)),hc=Array.from({length:12},(_,i)=>Number(state.headcountByMonth?.[`${y}-${String(i+1).padStart(2,'0')}`])||0).filter(Boolean),avg=hc.length?hc.reduce((a,b)=>a+b,0)/hc.length:'';years.push([y,f.revenue,f.directCosts,f.payroll,f.otherOpex,f.taxes,f.expense,f.preTax,f.netProfit,f.netMargin==null?'':f.netMargin,avg])});
  const projGroups=new Map();expandAllocatedOps(filled).forEach(o=>{const k=resolvedProject(o)||'Без проекта';if(!projGroups.has(k))projGroups.set(k,[]);projGroups.get(k).push(o)});const projects=[['Проект','Договоров','Поставок','Выручка','Прямые затраты','ФОТ','Прочие операционные расходы','Налоги','Все расходы','Прибыль до налогов','Чистая прибыль','Чистая маржа, %']];[...projGroups.keys()].sort((a,b)=>a.localeCompare(b,'ru')).forEach(k=>{const list=projGroups.get(k),f=financialMetrics(list),contractsN=new Set(list.map(o=>resolvedAgreementId(o)).filter(Boolean)).size,shipN=new Set(list.map(o=>o.shipmentId).filter(Boolean)).size;projects.push([k,contractsN,shipN,f.revenue,f.directCosts,f.payroll,f.otherOpex,f.taxes,f.expense,f.preTax,f.netProfit,f.netMargin==null?'':f.netMargin])});
  const shipGroups=new Map();expandAllocatedOps(filled).filter(o=>o.shipmentId).forEach(o=>{if(!shipGroups.has(o.shipmentId))shipGroups.set(o.shipmentId,[]);shipGroups.get(o.shipmentId).push(o)});const byShip=[['Проект','Договор','Поставка','Дата отгрузки','Срок оплаты','Ожидаемая оплата','Сумма поставки','Оплачено заказчиком','Осталось получить','Прямые затраты','ФОТ','Налоги','Все расходы','Чистая прибыль','Чистая маржа, %']];[...shipGroups].forEach(([id,list])=>{const x=shipmentById(id),a=agreementById(x?.agreementId),f=financialMetrics(list),pi=shipmentPaymentInfo(x,f.revenue),plan=Number(x?.amount)||0;byShip.push([a?.project||'',a?.contract||'',x?.name||'',x?.date||'',paymentTermLabel(x?.paymentTerm),pi.due,plan,f.revenue,plan>0?plan-f.revenue:'',f.directCosts,f.payroll,f.taxes,f.expense,f.netProfit,f.netMargin==null?'':f.netMargin])});
  const catMap=new Map();filled.filter(o=>o.type==='expense'&&!isDepositOp(o)&&!isDividendOp(o)).forEach(o=>{const k=o.category||'Без статьи';catMap.set(k,(catMap.get(k)||0)+Number(o.amount||0))});const categories=[['Статья расходов','Сумма'],...[...catMap].sort((a,b)=>b[1]-a[1]).map(([k,v])=>[k,v])];
- const t=totals(filled),f=financialMetrics(filled),summary=[['Показатель','Значение'],['Начальный остаток',Number(state.startBudget)||0],['Выручка / приход',t.income],['Прямые затраты',f.directCosts],['ФОТ',f.payroll],['Прочие операционные расходы',f.otherOpex],['Операционные расходы без налогов',f.opex],['Налоги',f.taxes],['Дивиденды (выплаты собственникам)',f.dividends],['Все хозяйственные расходы',f.expense],['Все денежные расходы с дивидендами',t.expense],['Маржинальный доход',f.contributionProfit],['Маржинальность после прямых, %',f.contributionMargin==null?'':f.contributionMargin],['Прибыль до налогов',f.preTax],['Операционная маржа, %',f.preTaxMargin==null?'':f.preTaxMargin],['Чистая прибыль',f.netProfit],['Чистая маржа, %',f.netMargin==null?'':f.netMargin],['ФОТ / выручка, %',f.payrollRatio==null?'':f.payrollRatio],['Налоговая нагрузка, %',f.taxBurden==null?'':f.taxBurden],['Остаток на счетах (доступно)',t.current],['На вкладах',t.onDeposit],['Всего денег (счета + вклады)',t.totalMoney],['Размещено на вклады',t.depositPlaced],['Возвращено с вкладов',t.depositReturned],['Операций',filled.length],['Договоров',state.agreements.filter(a=>a.contract).length],['Поставок / отгрузок',state.shipments.filter(isShipmentFilled).length]];
+ const t=totals(filled),f=financialMetrics(filled),summary=[['Показатель','Значение'],['Начальный остаток',Number(state.startBudget)||0],['Начальное сальдо ЕНС',Number(state.ensOpeningBalance)||0],['Расчётный остаток ЕНС',ensFlow(filled).balance],['Выручка / приход',t.income],['Прямые затраты',f.directCosts],['ФОТ',f.payroll],['Прочие операционные расходы',f.otherOpex],['Операционные расходы без налогов',f.opex],['Налоги',f.taxes],['Дивиденды (выплаты собственникам)',f.dividends],['Все хозяйственные расходы',f.expense],['Все денежные расходы с дивидендами',t.expense],['Маржинальный доход',f.contributionProfit],['Маржинальность после прямых, %',f.contributionMargin==null?'':f.contributionMargin],['Прибыль до налогов',f.preTax],['Операционная маржа, %',f.preTaxMargin==null?'':f.preTaxMargin],['Чистая прибыль',f.netProfit],['Чистая маржа, %',f.netMargin==null?'':f.netMargin],['ФОТ / выручка, %',f.payrollRatio==null?'':f.payrollRatio],['Налоговая нагрузка, %',f.taxBurden==null?'':f.taxBurden],['Остаток на счетах (доступно)',t.current],['На вкладах',t.onDeposit],['Всего учтено: счета + вклады + ЕНС',t.totalMoney],['Размещено на вклады',t.depositPlaced],['Возвращено с вкладов',t.depositReturned],['Операций',filled.length],['Договоров',state.agreements.filter(a=>a.contract).length],['Поставок / отгрузок',state.shipments.filter(isShipmentFilled).length]];
  const taxByType=[['Вид налога','Уплачено']];TAX_DETAIL_CATEGORIES.forEach(k=>taxByType.push([k,filled.filter(o=>isTaxOp(o)&&taxDetailName(o)===k).reduce((acc,o)=>acc+Math.abs(Number(o.amount)||0),0)]));
  const dividends=[['Дата','Сумма','Проект','Договор','Поставка','Информация']];filled.filter(isDividendOp).forEach(o=>dividends.push([o.date,Number(o.amount)||0,resolvedProject(o),resolvedContract(o),resolvedShipment(o),o.info]));
+ const ensSheet=[['Дата','Операция','Сумма','Изменение ЕНС','Комментарий']];filled.filter(o=>isEnsTransfer(o)||isEnsPaidTax(o)).forEach(o=>{let diff=isEnsTransfer(o)?(o.type==='expense'?Number(o.amount):-Number(o.amount)):-Number(o.amount);ensSheet.push([o.date,isEnsTransfer(o)?(o.type==='expense'?'Пополнение ЕНС':'Возврат с ЕНС'):'Зачёт '+o.category,Number(o.amount)||0,diff,o.info])});
  const deposits=[['Дата','Операция','Сумма','Комментарий','Проект','Договор','Поставка']];filled.filter(isDepositOp).forEach(o=>deposits.push([o.date,o.type==='expense'?'Размещение на вкладе':'Возврат со вклада',Number(o.amount)||0,o.info,resolvedProject(o),resolvedContract(o),resolvedShipment(o)]));
  const allocationsSheet=[['Дата платежа','ID операции','Тип','Статья','Сумма всего','Проект','Договор','Поставка','Разнесённая сумма']];filled.forEach(o=>{if(!o.allocations?.length)return;allocatedParts(o).forEach(part=>{allocationsSheet.push([o.date,o.id,o.type==='income'?'Приход':'Расход',o.category,Number(o.amount)||0,resolvedProject(part),resolvedContract(part),resolvedShipment(part),Number(part.amount)||0])})});
- const headcount=[['Месяц','Численность'],...Object.entries(state.headcountByMonth||{}).sort().map(([k,v])=>[k,Number(v)||0])];const sheets=[{name:'Движение',rows:movements,filter:true,widths:[14,22,24,24,12,24,15,38,16],moneyCols:[6,8]},{name:'Договоры',rows:contracts,filter:true,widths:[22,24,14,16,24,34,12,16,16,18,14,16],moneyCols:[3,7,8,9,11]},{name:'Поставки',rows:shipments,filter:true,widths:[22,24,24,15,22,18,20,16,34,18,18,14,16,16,16,16,18,14,12],moneyCols:[7,9,10,12,13,14,15,16]},{name:'По месяцам',rows:months,filter:true,widths:[14,16,16,16,16,16,16,18,18,16,14],moneyCols:[1,2,3,4,5,6,7,8]},{name:'По годам',rows:years,filter:true,widths:[12,16,16,16,16,16,16,18,18,16,18],moneyCols:[1,2,3,4,5,6,7,8]},{name:'По проектам',rows:projects,filter:true,widths:[28,12,12,16,16,16,16,16,16,18,18,16],moneyCols:[3,4,5,6,7,8,9,10]},{name:'По поставкам',rows:byShip,filter:true,widths:[24,24,24,15,22,18,16,18,18,16,16,16,16,18,16],moneyCols:[6,7,8,9,10,11,12,13]},{name:'Распределение',rows:allocationsSheet,filter:true,widths:[15,26,14,25,18,26,26,26,19],moneyCols:[4,8]},{name:'По статьям',rows:categories,filter:true,widths:[28,18],moneyCols:[1]},{name:'Вклады',rows:deposits,filter:true,widths:[15,25,20,40,22,22,22],moneyCols:[2]},{name:'Налоги по видам',rows:taxByType,filter:true,widths:[28,20],moneyCols:[1]},{name:'Дивиденды',rows:dividends,filter:true,widths:[15,20,22,24,24,40],moneyCols:[1]},{name:'Численность',rows:headcount,filter:true,widths:[16,16],moneyCols:[]},{name:'Сводка',rows:summary,filter:false,widths:[34,18],moneyCols:[1]}]; const contentTypes=`<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/>${sheets.map((_,i)=>`<Override PartName="/xl/worksheets/sheet${i+1}.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/>`).join('')}<Override PartName="/xl/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.styles+xml"/></Types>`;const rels=`<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="xl/workbook.xml"/></Relationships>`;const wb=`<?xml version="1.0" encoding="UTF-8" standalone="yes"?><workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships"><bookViews><workbookView xWindow="0" yWindow="0" windowWidth="24000" windowHeight="12000"/></bookViews><sheets>${sheets.map((s,i)=>`<sheet name="${xmlEscape(s.name)}" sheetId="${i+1}" r:id="rId${i+1}"/>`).join('')}</sheets><calcPr calcId="191029"/></workbook>`;const wbRels=`<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">${sheets.map((_,i)=>`<Relationship Id="rId${i+1}" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet${i+1}.xml"/>`).join('')}<Relationship Id="rId${sheets.length+1}" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles" Target="styles.xml"/></Relationships>`;const styles=`<?xml version="1.0" encoding="UTF-8" standalone="yes"?><styleSheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"><fonts count="2"><font><sz val="11"/><name val="Aptos"/><family val="2"/></font><font><b/><sz val="11"/><name val="Aptos"/><family val="2"/></font></fonts><fills count="2"><fill><patternFill patternType="none"/></fill><fill><patternFill patternType="gray125"/></fill></fills><borders count="1"><border><left/><right/><top/><bottom/><diagonal/></border></borders><cellStyleXfs count="1"><xf numFmtId="0" fontId="0" fillId="0" borderId="0"/></cellStyleXfs><cellXfs count="3"><xf numFmtId="0" fontId="0" fillId="0" borderId="0" xfId="0"/><xf numFmtId="0" fontId="1" fillId="0" borderId="0" xfId="0" applyFont="1"/><xf numFmtId="4" fontId="0" fillId="0" borderId="0" xfId="0" applyNumberFormat="1"/></cellXfs><cellStyles count="1"><cellStyle name="Normal" xfId="0" builtinId="0"/></cellStyles></styleSheet>`;const files=[{name:'[Content_Types].xml',data:contentTypes},{name:'_rels/.rels',data:rels},{name:'xl/workbook.xml',data:wb},{name:'xl/_rels/workbook.xml.rels',data:wbRels},{name:'xl/styles.xml',data:styles},...sheets.map((s,i)=>({name:`xl/worksheets/sheet${i+1}.xml`,data:xlsxSheetXml(s.rows,{filter:s.filter,widths:s.widths,moneyCols:s.moneyCols})}))];return zipStore(files);}
+ const headcount=[['Месяц','Численность'],...Object.entries(state.headcountByMonth||{}).sort().map(([k,v])=>[k,Number(v)||0])];const taxpExport=taxQuarterPlanExportRows(),taxadvExport=taxAdvanceExportRows();const quarterMap=new Map();filled.forEach(o=>{const y=String(o.date||'').slice(0,4),q=quarterOfDate(o.date);if(!/^\d{4}$/.test(y)||!q)return;const key=`${y}-Q${q}`;if(!quarterMap.has(key))quarterMap.set(key,[]);quarterMap.get(key).push(o)});const quarters=[['Год','Квартал','Поступления','Прямые затраты','ФОТ','Прочие операционные расходы','Уплачено налогов','Все расходы бизнеса','Денежный результат','Маржа денежного результата, %']];[...quarterMap.keys()].sort().forEach(k=>{const f=financialMetrics(quarterMap.get(k));quarters.push([Number(k.slice(0,4)),Number(k.slice(-1)),f.revenue,f.directCosts,f.payroll,f.otherOpex,f.taxes,f.expense,f.netProfit,f.netMargin==null?'':f.netMargin])});const sheets=[{name:'По кварталам',rows:quarters,filter:true,widths:[12,13,18,19,17,23,21,21,23,22],moneyCols:[2,3,4,5,6,7,8]},{name:'Налоговый план',rows:taxpExport,filter:true,widths:[14,13,24,13,24,24,24,13,24,24,22,22,20,22,21,20,27,22,22,20,22,22],moneyCols:[2,4,5,6,8,9,10,11,12,13,14,15,16,17,18,20,21]},{name:'Авансы по прибыли',rows:taxadvExport,filter:true,widths:[18,28,13,13,26,42],moneyCols:[4]},{name:'Движение',rows:movements,filter:true,widths:[14,22,24,24,12,24,15,38,16],moneyCols:[6,8]},{name:'Договоры',rows:contracts,filter:true,widths:[22,24,14,16,24,34,12,16,16,18,14,16],moneyCols:[3,7,8,9,11]},{name:'Поставки',rows:shipments,filter:true,widths:[22,24,24,15,22,18,20,16,34,18,18,14,16,16,16,16,18,14,12],moneyCols:[7,9,10,12,13,14,15,16]},{name:'По месяцам',rows:months,filter:true,widths:[14,16,16,16,16,16,16,18,18,16,14],moneyCols:[1,2,3,4,5,6,7,8]},{name:'По годам',rows:years,filter:true,widths:[12,16,16,16,16,16,16,18,18,16,18],moneyCols:[1,2,3,4,5,6,7,8]},{name:'По проектам',rows:projects,filter:true,widths:[28,12,12,16,16,16,16,16,16,18,18,16],moneyCols:[3,4,5,6,7,8,9,10]},{name:'По поставкам',rows:byShip,filter:true,widths:[24,24,24,15,22,18,16,18,18,16,16,16,16,18,16],moneyCols:[6,7,8,9,10,11,12,13]},{name:'Распределение',rows:allocationsSheet,filter:true,widths:[15,26,14,25,18,26,26,26,19],moneyCols:[4,8]},{name:'По статьям',rows:categories,filter:true,widths:[28,18],moneyCols:[1]},{name:'ЕНС',rows:ensSheet,filter:true,widths:[15,30,20,20,45],moneyCols:[2,3]},{name:'Вклады',rows:deposits,filter:true,widths:[15,25,20,40,22,22,22],moneyCols:[2]},{name:'Налоги по видам',rows:taxByType,filter:true,widths:[28,20],moneyCols:[1]},{name:'Дивиденды',rows:dividends,filter:true,widths:[15,20,22,24,24,40],moneyCols:[1]},{name:'Численность',rows:headcount,filter:true,widths:[16,16],moneyCols:[]},{name:'Сводка',rows:summary,filter:false,widths:[34,18],moneyCols:[1]}]; const contentTypes=`<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/>${sheets.map((_,i)=>`<Override PartName="/xl/worksheets/sheet${i+1}.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/>`).join('')}<Override PartName="/xl/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.styles+xml"/></Types>`;const rels=`<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="xl/workbook.xml"/></Relationships>`;const wb=`<?xml version="1.0" encoding="UTF-8" standalone="yes"?><workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships"><bookViews><workbookView xWindow="0" yWindow="0" windowWidth="24000" windowHeight="12000"/></bookViews><sheets>${sheets.map((s,i)=>`<sheet name="${xmlEscape(s.name)}" sheetId="${i+1}" r:id="rId${i+1}"/>`).join('')}</sheets><calcPr calcId="191029"/></workbook>`;const wbRels=`<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">${sheets.map((_,i)=>`<Relationship Id="rId${i+1}" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet${i+1}.xml"/>`).join('')}<Relationship Id="rId${sheets.length+1}" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles" Target="styles.xml"/></Relationships>`;const styles=`<?xml version="1.0" encoding="UTF-8" standalone="yes"?><styleSheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"><fonts count="2"><font><sz val="11"/><name val="Aptos"/><family val="2"/></font><font><b/><sz val="11"/><name val="Aptos"/><family val="2"/></font></fonts><fills count="2"><fill><patternFill patternType="none"/></fill><fill><patternFill patternType="gray125"/></fill></fills><borders count="1"><border><left/><right/><top/><bottom/><diagonal/></border></borders><cellStyleXfs count="1"><xf numFmtId="0" fontId="0" fillId="0" borderId="0"/></cellStyleXfs><cellXfs count="3"><xf numFmtId="0" fontId="0" fillId="0" borderId="0" xfId="0"/><xf numFmtId="0" fontId="1" fillId="0" borderId="0" xfId="0" applyFont="1"/><xf numFmtId="4" fontId="0" fillId="0" borderId="0" xfId="0" applyNumberFormat="1"/></cellXfs><cellStyles count="1"><cellStyle name="Normal" xfId="0" builtinId="0"/></cellStyles></styleSheet>`;const files=[{name:'[Content_Types].xml',data:contentTypes},{name:'_rels/.rels',data:rels},{name:'xl/workbook.xml',data:wb},{name:'xl/_rels/workbook.xml.rels',data:wbRels},{name:'xl/styles.xml',data:styles},...sheets.map((s,i)=>({name:`xl/worksheets/sheet${i+1}.xml`,data:xlsxSheetXml(s.rows,{filter:s.filter,widths:s.widths,moneyCols:s.moneyCols})}))];return zipStore(files);}
 $('#exportXlsx').addEventListener('click',()=>{try{downloadBlob(buildXlsx(),`MoneyFlow_${todayISO()}.xlsx`);toast('Excel выгружен')}catch(e){console.error(e);alert('Не удалось сформировать Excel-файл.')}});
 
 
@@ -1350,9 +1621,314 @@ function addOcrIds(ids){let added=0,skipped=0,first=-1;const done=new Set();ids.
 $('#ocrResults').addEventListener('click',e=>{const add=e.target.closest('[data-add-ocr]');if(add){addOcrIds([add.dataset.addOcr]);return}const rm=e.target.closest('[data-remove-ocr]');if(rm){ocrItems=ocrItems.filter(x=>x.id!==rm.dataset.removeOcr);cleanupOcrSources();renderOcrResults();return}const addSrc=e.target.closest('[data-add-source]');if(addSrc){addOcrIds(activeSourceItems(addSrc.dataset.addSource).map(x=>x.id));return}const rmSrc=e.target.closest('[data-remove-source]');if(rmSrc){const sid=rmSrc.dataset.removeSource;ocrItems=ocrItems.filter(x=>x.sourceId!==sid);ocrSources=ocrSources.filter(x=>x.id!==sid);renderOcrResults();return}const reparse=e.target.closest('[data-reparse-source]');if(reparse){const sid=reparse.dataset.reparseSource,src=ocrSources.find(x=>x.id===sid);if(!src)return;const ta=$(`#ocrResults textarea[data-source-text="${sid}"]`);if(ta)src.text=ta.value;const rows=parse1CRows(src.text,src.confidence);ocrItems=ocrItems.filter(x=>x.sourceId!==sid);rows.forEach((r,n)=>ocrItems.push({...r,shipmentId:r.shipmentId||'',id:uid(),sourceId:sid,rowNo:n+1}));cleanupOcrSources();renderOcrResults();toast(`Найдено строк: ${rows.length}`)}});$('#addAllOcr').addEventListener('click',()=>addOcrIds(ocrItems.map(x=>x.id)));$('#clearOcr').addEventListener('click',()=>{ocrItems=[];ocrSources=[];renderOcrResults()});
 
 function toast(text){const t=$('#toast');t.textContent=text;t.classList.add('show');clearTimeout(toast.t);toast.t=setTimeout(()=>t.classList.remove('show'),1600)}
+
+/* v18.4 — Сценарный налоговый план, не отражается в ДДС. */
+let taxPlanSelectedYear=new Date().getFullYear();
+let taxPlanSelectedQuarter=Math.floor(new Date().getMonth()/3)+1;
+const TAX_PLAN_FIELDS=['salesBaseGross','salesReducedGross','salesZeroGross','exportInputVat','costsBaseGross','costsReducedGross','otherExpenses'];
+const taxPlanKey=(y,q)=>`${y}-Q${q}`;
+function taxPlanDefaultRate(year){return Number(year)>=2026?22:20;}
+function taxPlanRaw(year,quarter){return state.quarterTaxPlans?.[taxPlanKey(year,quarter)]||null;}
+function taxPlanHasInputs(row){return !!row&&TAX_PLAN_FIELDS.some(f=>row[f]!==''&&row[f]!==null&&row[f]!==undefined);}
+function taxPlanComputed(year,quarter){
+ const row=taxPlanRaw(year,quarter);
+ if(!taxPlanHasInputs(row))return null;
+ const baseRate=[0,10,20,22].includes(Number(row.baseRate))?Number(row.baseRate):taxPlanDefaultRate(year);
+ const costRate=[0,10,20,22].includes(Number(row.costRate))?Number(row.costRate):taxPlanDefaultRate(year);
+ const val=f=>Math.max(0,Number(row[f])||0);
+ const outputVat=val('salesBaseGross')*baseRate/(100+baseRate)+val('salesReducedGross')*10/110;
+ const inputVatBase=val('costsBaseGross')*costRate/(100+costRate)+val('costsReducedGross')*10/110;
+ const inputVatExport=val('exportInputVat');
+ const inputVat=inputVatBase+inputVatExport;
+ const revenueNet=val('salesBaseGross')+val('salesReducedGross')+val('salesZeroGross')-outputVat;
+ const costsNet=val('costsBaseGross')+val('costsReducedGross')-inputVatBase+val('otherExpenses');
+ const profit=revenueNet-costsNet;
+ return{outputVat,inputVat,inputVatBase,inputVatExport,exportSales:val('salesZeroGross'),vatBalance:outputVat-inputVat,vatDue:Math.max(0,outputVat-inputVat),vatRefund:Math.max(0,inputVat-outputVat),revenueNet,costsNet,profit,baseRate,costRate};
+}
+function taxPlanAnnualStats(year){
+ const rows=[];let cumulativeProfit=0,allEarlierFilled=true,previousCalculatedTax=0;
+ for(let q=1;q<=4;q++){
+  const p=taxPlanComputed(year,q);
+  if(!p){rows.push(null);allEarlierFilled=false;continue;}
+  cumulativeProfit+=p.profit;
+  const cumulTax=Math.max(0,cumulativeProfit)*.25;
+  const incremental=allEarlierFilled?cumulTax-previousCalculatedTax:null;
+  rows.push({...p,completeYtd:allEarlierFilled,profitTaxChange:incremental,cumulativeProfit,cumulativeTax:cumulTax,reserve:incremental===null?null:p.vatDue+Math.max(0,incremental)});
+  previousCalculatedTax=cumulTax;
+ }
+ return rows;
+}
+function taxPlanYearOptions(){
+ const current=new Date().getFullYear();const years=new Set([current-1,current,current+1,current+2,taxPlanSelectedYear]);
+ for(const k of Object.keys(state.quarterTaxPlans||{}))if(/^\d{4}-Q[1-4]$/.test(k))years.add(Number(k.slice(0,4)));
+ return [...years].sort((a,b)=>a-b);
+}
+/* v18.5 — limit + monthly advance forecast; data from PLANNED realization, never from bank receipts. */
+function taxAdvancePriorQuarters(year,quarter){
+ const idx=Number(year)*4+Number(quarter)-1;
+ return [4,3,2,1].map(back=>{const n=idx-back,y=Math.floor(n/4),q=n%4+1,raw=taxPlanRaw(y,q),p=taxPlanComputed(y,q);const hasData=!!p&&['salesBaseGross','salesReducedGross','salesZeroGross'].some(f=>raw?.[f]!==''&&raw?.[f]!=null);return{year:y,quarter:q,hasData,revenue:hasData?p.revenueNet:null};});
+}
+function taxAdvanceLimit(year,quarter){
+ const periods=taxAdvancePriorQuarters(year,quarter),complete=periods.every(x=>x.hasData),total=complete?periods.reduce((sum,x)=>sum+x.revenue,0):null;
+ return{periods,complete,total,average:complete?total/4:null,exceeded:complete?total>60000000:null};
+}
+function taxAdvanceRegime(year,quarter){
+ const limit=taxAdvanceLimit(year,quarter),override=state.taxAdvanceMode||'auto';
+ if(override==='monthly'||override==='quarterly')return{regime:override,source:'Подтверждённый выбор',limit,uncertain:false};
+ if(!limit.complete)return{regime:'unknown',source:'Истории четырёх кварталов недостаточно. Укажи подтверждённый бухгалтером режим или заполни прошлые кварталы.',limit,uncertain:true};
+ return{regime:limit.exceeded?'monthly':'quarterly',source:limit.exceeded?'Лимит 60 млн ₽ превышен':'Лимит 60 млн ₽ не превышен',limit,uncertain:false};
+}
+function taxAdvanceMonthlyAmount(year,quarter){
+ const manual=taxPlanRaw(year,quarter)?.monthlyAdvanceOverride;
+ if(manual!==''&&manual!==null&&manual!==undefined&&Number.isFinite(Number(manual)))return Math.max(0,Number(manual));
+ const current=taxPlanAnnualStats(year);
+ if(quarter===1){
+  const prev=taxPlanAnnualStats(year-1),q2=prev[1],q3=prev[2];
+  if(!q2?.completeYtd||!q3?.completeYtd)return null;
+  return Math.max(0,(q3.cumulativeTax-q2.cumulativeTax)/3);
+ }
+ if(quarter===2)return current[0]?.completeYtd?Math.max(0,current[0].cumulativeTax/3):null;
+ if(quarter===3)return current[1]?.completeYtd&&current[0]?.completeYtd?Math.max(0,(current[1].cumulativeTax-current[0].cumulativeTax)/3):null;
+ return current[2]?.completeYtd&&current[1]?.completeYtd?Math.max(0,(current[2].cumulativeTax-current[1].cumulativeTax)/3):null;
+}
+function taxAdvanceQuarterInfo(year,quarter){
+ const status=taxAdvanceRegime(year,quarter),annual=taxPlanAnnualStats(year),current=annual[quarter-1];
+ const month=status.regime==='monthly'?taxAdvanceMonthlyAmount(year,quarter):status.regime==='quarterly'?0:null;
+ const increment=current?.profitTaxChange??null;
+ const topup=increment===null||month===null?null:Math.max(0,increment-month*3);
+ const carry=increment===null||month===null?null:Math.min(0,increment-month*3);
+ return{...status,year,quarter,month,increment,topup,carry,monthTotal:month===null?null:month*3};
+}
+function taxPlanCashReserve(year,quarter){
+ const p=taxPlanComputed(year,quarter),info=taxAdvanceQuarterInfo(year,quarter);
+ return !p||info.monthTotal===null||info.topup===null?null:p.vatDue+info.monthTotal+info.topup;
+}
+function taxAdvanceCalendar(year){
+ const rows=[];
+ for(let q=1;q<=4;q++){
+  const info=taxAdvanceQuarterInfo(year,q),base=(q-1)*3;
+  if(info.regime==='monthly'){
+   for(let j=1;j<=3;j++){
+    const month=base+j;
+    rows.push({date:`${year}-${String(month).padStart(2,'0')}-28`,year,quarter:q,type:'Ежемесячный аванс',amount:info.month,source:info.source,uncertain:info.uncertain});
+   }
+  }
+  const due=q===4?`${year+1}-03-28`:`${year}-${String(q*3+1).padStart(2,'0')}-28`;
+  rows.push({date:due,year,quarter:q,type:q===4?'Итог года · доплата':'Доплата по итогам квартала',amount:info.topup,source:info.carry!=null&&info.carry<0?'Расчётное уменьшение начисления; зачет переплаты не моделируется':info.source,uncertain:info.uncertain});
+ }
+ return rows.sort((a,b)=>a.date.localeCompare(b.date)||a.quarter-b.quarter);
+}
+function renderTaxAdvance(){
+ const year=taxPlanSelectedYear,q=taxPlanSelectedQuarter,info=taxAdvanceQuarterInfo(year,q),lim=info.limit;
+ const formatted=x=>x===null?'—':money(x),set=(selector,value)=>setText(selector,value);
+ set('#taxAdvanceTurnover',formatted(lim.total));
+ set('#taxAdvanceTurnoverNote',lim.complete?`Средняя за квартал ${formatted(lim.average)} · порог 15 000 000 ₽`:`Заполнено ${lim.periods.filter(x=>x.hasData).length} из 4 прошлых кварталов`);
+ set('#taxAdvanceRegime',info.regime==='monthly'?'Ежемесячные':info.regime==='quarterly'?'Квартальные':'Не определён');
+ set('#taxAdvanceRegimeNote',info.source);
+ set('#taxAdvanceMonthly',info.regime==='monthly'?formatted(info.month):info.regime==='quarterly'?'Не требуется':'—');
+ set('#taxAdvanceTopup',formatted(info.topup));
+ set('#taxAdvanceTopupNote',info.carry!=null&&info.carry<0?`Расчётное уменьшение начисления: ${money(-info.carry)}; не возврат`:'После зачёта расчётных ежемесячных авансов');
+ const badge=$('#taxAdvanceStatus');badge.className='taxadv-badge'+(info.uncertain?' warning':info.regime==='monthly'?' monthly':'');badge.textContent=info.uncertain?'Недостаточно данных':info.regime==='monthly'?'Ежемесячные авансы':'Квартальные авансы';
+ const explanation=[];
+ if(!lim.complete)explanation.push('Для определения лимита нужны четыре предыдущих квартала реализации без НДС. Без них режим неизвестен: укажи подтверждённый бухгалтером режим.');
+ else explanation.push(`По четырём завершённым/плановым кварталам реализация ${money(lim.total)} (${lim.exceeded?'выше':'не выше'} 60 млн ₽). Это оценка по твоим планам, не по налоговой декларации.`);
+ if(state.taxAdvanceMode!=='auto')explanation.push('Режим выбран вручную и имеет приоритет над автоматической оценкой.');
+ if(info.regime==='monthly'&&taxPlanRaw(year,q)?.monthlyAdvanceOverride!=='')explanation.push('Если указан аванс из декларации, он имеет приоритет над оценкой по прошлым кварталам.');
+ if(info.regime==='monthly'&&info.month===null)explanation.push('Ежемесячный аванс не может быть вычислен без прошлых кварталов. Расчёт: II квартал — налог за I квартал / 3; III — (налог за полугодие минус за I квартал) / 3; IV и I — (за 9 месяцев минус за полугодие) / 3 (для I — прошлого года). Сверь с декларацией бухгалтера.');
+ if(info.topup===null)explanation.push('Доплата по итогам квартала пока неизвестна: нужен полный план с начала года и рассчитанные ежемесячные авансы.');
+ explanation.push('Сумма ежемесячного платежа — 1/3 расчётного аванса за квартал, не вся сумма налога прошлого квартала. План сам не создаёт ДДС-операции; фактические пополнения ЕНС вводи в «Движении».');
+ set('#taxAdvanceExplanation',explanation.join(' '));
+ $('#taxAdvanceHistoryRows').innerHTML=lim.periods.map(p=>`<tr><td><b>${p.quarter} кв. ${p.year}</b></td><td class="r">${formatted(p.revenue)}</td><td>${p.hasData?'Есть план':'Нет данных'}</td></tr>`).join('');
+ const bars=[1,2,3,4].map(n=>{const a=taxAdvanceQuarterInfo(year,n);return{key:`${n} кв.`,month:a.monthTotal||0,quarter:a.topup||0}});
+ groupedBarsV12('#taxAdvanceChart',bars,[{key:'month',label:'Ежемесячные авансы',color:'#2563eb'},{key:'quarter',label:'Доплата после квартала',color:'#15936d'}]);
+ const calendar=taxAdvanceCalendar(year);
+ set('#taxAdvanceCalendarMeta',`${calendar.length} плановых строк`);
+ $('#taxAdvanceCalendarRows').innerHTML=calendar.map(r=>`<tr><td><b>${escapeHtml(formatDateShort(r.date))}</b></td><td>${escapeHtml(r.type)}</td><td>${r.quarter} кв. ${r.year}</td><td class="r"><b>${formatted(r.amount)}</b></td><td>${escapeHtml(r.amount===null?'Недостаточно данных · '+r.source:r.uncertain?'Предположение · '+r.source:r.source)}</td></tr>`).join('');
+}
+function taxPlanFormMarkup(year,quarter){
+ const row=taxPlanRaw(year,quarter)||{};
+ document.querySelectorAll('#tab-taxplanner [data-tax-field]').forEach(input=>{input.value=formatMoneyInputValue(row[input.dataset.taxField]??'');});
+ document.querySelectorAll('#tab-taxplanner [data-tax-rate]').forEach(el=>{el.value=String([0,10,20,22].includes(Number(row[el.dataset.taxRate]))?Number(row[el.dataset.taxRate]):taxPlanDefaultRate(year));});
+}
+function taxPlanQuarterView(){
+ const select=$('#taxPlanYear');if(!select)return;
+ select.innerHTML=taxPlanYearOptions().map(y=>`<option value="${y}" ${y===taxPlanSelectedYear?'selected':''}>${y}</option>`).join('');
+ $('#taxPlanQuarters').innerHTML=[1,2,3,4].map(q=>`<button type="button" data-tax-q="${q}" class="${q===taxPlanSelectedQuarter?'active':''}">${q} квартал${taxPlanHasInputs(taxPlanRaw(taxPlanSelectedYear,q))?' · ●':''}</button>`).join('');
+ taxPlanFormMarkup(taxPlanSelectedYear,taxPlanSelectedQuarter);
+ const advanceSelect=$('#taxAdvanceMode');if(advanceSelect)advanceSelect.value=state.taxAdvanceMode||'auto';
+ taxPlanRenderOutputs();
+}
+function taxPlanRenderOutputs(){
+ const year=taxPlanSelectedYear,q=taxPlanSelectedQuarter,annual=taxPlanAnnualStats(year),selected=annual[q-1];
+ const fmt=n=>n==null?'—':money(n);
+ setText('#taxPlanRevenueNet',fmt(selected?.revenueNet));
+ setText('#taxPlanOutputVat',fmt(selected?.outputVat));
+ setText('#taxPlanExportSales',fmt(selected?.exportSales));
+ setText('#taxPlanCostsNet',fmt(selected?.costsNet));
+ setText('#taxPlanInputVat',fmt(selected?.inputVat));
+ setText('#taxPlanInputVatBase',fmt(selected?.inputVatBase));
+ setText('#taxPlanInputVatExport',fmt(selected?.inputVatExport));
+ setText('#taxPlanVatRefund',fmt(selected?.vatRefund));
+ setText('#taxPlanVatDue',fmt(selected?.vatDue));
+ setText('#taxPlanProfit',fmt(selected?.profit));
+ setText('#taxPlanProfitTax',fmt(selected?.profitTaxChange));
+ setText('#taxPlanReserve',fmt(taxPlanCashReserve(year,q)));
+ const ens=ensFlow().balance,planned=taxPlanCashReserve(year,q),advInfo=taxAdvanceQuarterInfo(year,q),knownPart=(selected?.vatDue||0)+(advInfo.monthTotal||0),minKnown=!!selected||advInfo.monthTotal!==null;setText('#taxEnsBalance',money(ens));setText('#taxPlannedPayments',planned===null?(minKnown?'от '+money(knownPart)+' · доплата неизвестна':'—'):fmt(planned));const isCurrent=year===new Date().getFullYear()&&q===Math.floor(new Date().getMonth()/3)+1;setText('#taxEnsNeed',planned===null||!isCurrent?'—':money(Math.max(0,planned-Math.max(0,ens))));document.querySelector('#taxEnsNeed').parentElement.title=isCurrent?'Оценка для текущего квартала, без будущих зачётов ФНС; это не подтверждённое сальдо':'Дополнительное перечисление сравнивается с расчётным остатком ЕНС только в текущем квартале';
+ setText('#taxPlanVatNote',selected?(selected.vatBalance<0?`Вычеты превышают исходящий НДС на ${money(selected.vatRefund)} — смотри «к возмещению»`:'Экспорт 0% не создаёт исходящий НДС; вычеты — отдельно'):'Из реализации минус возможные вычеты');
+ setText('#taxPlanProfitTaxNote',selected?.completeYtd?'Изменение годовой оценки по итогам квартала':'Для расчёта нарастающим итогом заполни все предыдущие кварталы');
+ let note='Заполни сумму отгрузок и ожидаемую себестоимость. Пустые поля не означают нулевой налог.';
+ if(selected){
+  if(!selected.completeYtd)note='В этом году отсутствует план хотя бы за один предыдущий квартал. Поэтому налог на прибыль к доплате не показываем: он рассчитывается нарастающим итогом. НДС за выбранный квартал рассчитан отдельно.';
+  else if(selected.vatBalance<0)note='По твоему плану входящий НДС больше исходящего. В этом сценарии НДС к уплате равен нулю; возможное возмещение указано отдельно и подлежит подтверждению.';
+  else note='Это оценка по введённому плану отгрузок и признаваемых расходов, а не декларация и не реальный платёж. Модель не учитывает авансы и корректировки налогового учёта.';
+  if(selected.profitTaxChange!==null&&selected.profitTaxChange<0)note+=' Прирост годового налога отрицательный: это уменьшение расчётного начисления, не автоматический возврат налога.';
+ }
+ setText('#taxPlanGuidance',note);
+ const taxes=[],eco=[];
+ $('#taxPlanRows').innerHTML=annual.map((r,i)=>{
+  const idx=i+1,sel=idx===q?' selected':'',tax=r?.profitTaxChange;
+  if(r){taxes.push({key:`${idx} кв.`,vat:r.vatDue,profit:tax==null?0:Math.max(0,tax)});eco.push({key:`${idx} кв.`,revenue:r.revenueNet,cost:r.costsNet});}
+  return `<tr class="${sel}" data-tax-row="${idx}"><td><b>${idx} квартал</b></td><td class="r">${fmt(r?.revenueNet)}</td><td class="r">${fmt(r?.costsNet)}</td><td class="r">${fmt(r?.vatDue)}</td><td class="r">${fmt(r?.profit)}</td><td class="r">${fmt(tax)}</td><td class="r"><b>${fmt(taxPlanCashReserve(year,idx))}</b></td></tr>`;
+ }).join('');
+ setText('#taxPlanYearMeta',`${annual.filter(Boolean).length} из 4 кварталов заполнено`);
+ const blank=[1,2,3,4].map(i=>({key:`${i} кв.`,vat:0,profit:0,revenue:0,cost:0}));
+ const get=x=>taxes.find(t=>t.key===x.key)||x;
+ groupedBarsV12('#taxPlanTaxChart',blank.map(get),[{key:'vat',label:'НДС к уплате',color:'#2563eb'},{key:'profit',label:'Налог на прибыль',color:'#0d9a6a'}]);
+ groupedBarsV12('#taxPlanEconomicsChart',blank.map(x=>eco.find(t=>t.key===x.key)||x),[{key:'revenue',label:'Отгрузки без НДС',color:'#2563eb'},{key:'cost',label:'Затраты без НДС',color:'#d09d35'}]);
+ renderTaxAdvance();
+}
+function renderTaxPlanner(){
+ const host=$('#tab-taxplanner');if(!host)return;
+ // Form exists in HTML; only reset inputs when changing period or re-opening the tab.
+ taxPlanQuarterView();
+}
+$('#tab-taxplanner').addEventListener('change',e=>{
+ const y=e.target.closest('#taxPlanYear');if(y){taxPlanSelectedYear=Number(y.value)||new Date().getFullYear();taxPlanQuarterView();return;}
+ if(e.target.id==='taxAdvanceMode'){state.taxAdvanceMode=e.target.value;scheduleSave();taxPlanRenderOutputs();return;}
+ const el=e.target.closest('[data-tax-rate]');if(el){const k=taxPlanKey(taxPlanSelectedYear,taxPlanSelectedQuarter);state.quarterTaxPlans??={};const row=state.quarterTaxPlans[k]??={};row[el.dataset.taxRate]=Number(el.value);scheduleSave();taxPlanRenderOutputs();}
+});
+$('#tab-taxplanner').addEventListener('input',e=>{
+ const el=e.target.closest('[data-tax-field]');if(!el)return;
+ const k=taxPlanKey(taxPlanSelectedYear,taxPlanSelectedQuarter);state.quarterTaxPlans??={};const row=state.quarterTaxPlans[k]??={};
+ const parsed=formatMoneyInputElement(el);row[el.dataset.taxField]=parsed===''?'':Math.max(0,Number(parsed)||0);
+ scheduleSave();taxPlanRenderOutputs();
+});
+$('#tab-taxplanner').addEventListener('focusout',e=>{
+ const el=e.target.closest('[data-tax-field]');if(!el)return;const v=taxPlanRaw(taxPlanSelectedYear,taxPlanSelectedQuarter)?.[el.dataset.taxField];el.value=formatMoneyInputValue(v??'');
+});
+$('#tab-taxplanner').addEventListener('click',e=>{
+ const q=e.target.closest('[data-tax-q], [data-tax-row]');if(q){taxPlanSelectedQuarter=Number(q.dataset.taxQ||q.dataset.taxRow);taxPlanQuarterView();return;}
+ if(e.target.closest('#taxPlanCopyPrevious')){
+  const idx=taxPlanSelectedYear*4+taxPlanSelectedQuarter-1;if(idx<=0)return;
+  const prevYear=Math.floor((idx-1)/4),prevQ=(idx-1)%4+1,previous=taxPlanRaw(prevYear,prevQ);
+  if(!taxPlanHasInputs(previous)){toast('В предыдущем квартале нет заполненного плана');return;}
+  if(taxPlanHasInputs(taxPlanRaw(taxPlanSelectedYear,taxPlanSelectedQuarter))&&!confirm('Заменить текущий план данными предыдущего квартала?'))return;
+  state.quarterTaxPlans[taxPlanKey(taxPlanSelectedYear,taxPlanSelectedQuarter)]={...previous};scheduleSave();taxPlanQuarterView();toast('План скопирован');return;
+ }
+ if(e.target.closest('#taxPlanFromShipments')){
+  const year=taxPlanSelectedYear,quarter=taxPlanSelectedQuarter,items=state.shipments.filter(x=>isShipmentFilled(x)&&Number(x.amount)>0&&Number(String(x.date||'').slice(0,4))===year&&Number(quarterOfDate(x.date))===quarter);
+  if(!items.length){toast('В этом квартале нет поставок с датой и суммой');return;}
+  const gross=items.reduce((sum,x)=>sum+Number(x.amount||0),0);
+  if(!confirm(`Подставить ${items.length} поставок на ${money(gross)} в «Отгрузки с основным НДС»? Вручную введённая сумма будет заменена. Проверь ставку и что суммы в реестре указаны с НДС.`))return;
+  state.quarterTaxPlans??={};const row=state.quarterTaxPlans[taxPlanKey(year,quarter)]??={};row.salesBaseGross=gross;row.baseRate=taxPlanDefaultRate(year);
+  scheduleSave();taxPlanQuarterView();toast('Суммы поставок подставлены');
+ }
+});
+function taxAdvanceExportRows(){
+ const rows=[['Плановая дата','Вид платежа','Год','Квартал','Сумма к резервированию','Основание / режим']];
+ const years=[...new Set(Object.keys(state.quarterTaxPlans||{}).filter(x=>/^\d{4}-Q[1-4]$/.test(x)).map(x=>Number(x.slice(0,4))))].sort((a,b)=>a-b);
+ for(const y of years)for(const item of taxAdvanceCalendar(y))rows.push([item.date,item.type,item.year,item.quarter,item.amount??'',item.uncertain?'Режим не подтверждён · '+item.source:item.source]);
+ return rows;
+}
+function taxQuarterPlanExportRows(){
+ const rows=[['Год','Квартал','Отгрузки с основным НДС','Ставка, %','Отгрузки с НДС 10%','Экспорт со ставкой НДС 0%','Себестоимость с основным НДС','Ставка входящего, %','Себестоимость с НДС 10%','Прочие расходы без НДС','Реализация без НДС','Затраты без НДС','Исходящий НДС','Предполагаемый входящий НДС','НДС к уплате','Прибыль до налога','Изменение оценки налога на прибыль','Плановый налоговый отток','Выручка 4 пред. кварталов','Режим авансов','Аванс в месяц','Доплата за квартал','Доп. входящий НДС по экспорту','НДС к возмещению (оценка)']];
+ const years=[...new Set(Object.keys(state.quarterTaxPlans||{}).filter(k=>/^\d{4}-Q[1-4]$/.test(k)).map(k=>Number(k.slice(0,4))))].sort((a,b)=>a-b);
+ for(const y of years){const annual=taxPlanAnnualStats(y);for(let q=1;q<=4;q++){
+  const p=annual[q-1],raw=taxPlanRaw(y,q);if(!p)continue;
+  rows.push([y,q,Number(raw.salesBaseGross)||0,p.baseRate,Number(raw.salesReducedGross)||0,Number(raw.salesZeroGross)||0,Number(raw.costsBaseGross)||0,p.costRate,Number(raw.costsReducedGross)||0,Number(raw.otherExpenses)||0,p.revenueNet,p.costsNet,p.outputVat,p.inputVat,p.vatDue,p.profit,p.profitTaxChange??'',taxPlanCashReserve(y,q)??'',taxAdvanceLimit(y,q).total??'',taxAdvanceRegime(y,q).regime==='monthly'?'Ежемесячные':'Квартальные',taxAdvanceQuarterInfo(y,q).month??'',taxAdvanceQuarterInfo(y,q).topup??'',Number(raw.exportInputVat)||0,p.vatRefund]);
+ }}return rows;
+}
 window.addEventListener('pageshow',()=>{if(activeTab==='contracts'){renderAgreementTable();renderShipmentTable();}});
 load();
 setTimeout(()=>{if(document.querySelectorAll('#agreementRows tr').length===0)renderAgreementTable();if(document.querySelectorAll('#shipmentRows tr').length===0)renderShipmentTable();initResizableTables();},0);
+})();
+</script>
+
+
+<script>
+/* Контекстные стрелки прокрутки: перемещают только видимую таблицу, не меняя записи. */
+(() => {
+ 'use strict';
+ const nav=document.getElementById('quickTableNav');
+ const up=document.getElementById('quickTableTop');
+ const down=document.getElementById('quickTableBottom');
+ const caption=document.getElementById('quickTableCaption');
+ const movement=document.getElementById('tableScroll');
+ const agreements=document.getElementById('agreementTable')?.closest('.table-scroll');
+ const shipments=document.getElementById('shipmentTableScroll');
+ const scrollers=[movement,agreements,shipments].filter(Boolean);
+ let lastTarget=null, currentTarget=null, pending=false;
+ const labels=new Map([[movement,'Движение'],[agreements,'Договоры'],[shipments,'Поставки']]);
+ const isScrollable=el => !!el && el.scrollHeight>el.clientHeight+12;
+ function visibleHeight(el){
+   if(!el || !el.getClientRects().length)return 0;
+   const r=el.getBoundingClientRect();
+   return Math.max(0, Math.min(window.innerHeight,r.bottom)-Math.max(0,r.top));
+ }
+ function pickTarget(){
+   const tab=document.querySelector('.tabpage.active')?.id;
+   if(tab==='tab-movement')return isScrollable(movement)?movement:null;
+   if(tab!=='tab-contracts')return null;
+   const candidates=[agreements,shipments].filter(isScrollable);
+   if(!candidates.length)return null;
+   // If both are partially on screen, prefer the table the user last touched.
+   if(lastTarget && candidates.includes(lastTarget) && visibleHeight(lastTarget)>70)return lastTarget;
+   return candidates.sort((a,b)=>visibleHeight(b)-visibleHeight(a))[0];
+ }
+ function refresh(){
+   pending=false;
+   const target=pickTarget();
+   currentTarget=target;
+   nav.hidden=!target;
+   if(!target)return;
+   caption.textContent=labels.get(target)||'Таблица';
+   const max=Math.max(0,target.scrollHeight-target.clientHeight);
+   up.disabled=target.scrollTop<=2;
+   down.disabled=target.scrollTop>=max-2;
+ }
+ function queueRefresh(){if(pending)return;pending=true;requestAnimationFrame(refresh);}
+ function jump(toBottom){
+   const target=pickTarget();if(!target)return;
+   lastTarget=target;
+   target.scrollTo({top:toBottom?target.scrollHeight-target.clientHeight:0,behavior:'instant'});
+   // Keep the navigated table in the viewport, without scrolling it horizontally.
+   const r=target.getBoundingClientRect();
+   if(r.bottom<85 || r.top>window.innerHeight-85)target.scrollIntoView({block:'nearest',behavior:'smooth'});
+   queueRefresh();
+ }
+ up.addEventListener('click',()=>jump(false));
+ down.addEventListener('click',()=>jump(true));
+ scrollers.forEach(el=>{
+   el.addEventListener('scroll',()=>{lastTarget=el;queueRefresh()},{passive:true});
+   el.addEventListener('pointerdown',()=>{lastTarget=el;queueRefresh()},{passive:true});
+   el.addEventListener('focusin',()=>{lastTarget=el;queueRefresh()});
+ });
+ document.querySelectorAll('.tabbtn').forEach(btn=>btn.addEventListener('click',()=>{
+   // Reset so that a reopened tab chooses the visible table, not a stale one.
+   lastTarget=null;
+   queueRefresh();
+ }));
+ window.addEventListener('resize',queueRefresh,{passive:true});
+ window.addEventListener('scroll',queueRefresh,{passive:true});
+ // Filters and adding rows can change the scrollable height with no scroll event.
+ if(typeof MutationObserver==='function'){
+   const observer=new MutationObserver(queueRefresh);
+   ['rows','agreementRows','shipmentRows'].forEach(id=>{
+     const tbody=document.getElementById(id);
+     if(tbody)observer.observe(tbody,{childList:true});
+   });
+ }
+ queueRefresh();
 })();
 </script>
 
